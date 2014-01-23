@@ -1,0 +1,12 @@
+.sharethis-wrapper {
+  // Force content-box sizing on share this, which breaks layout if the
+  // default for the site is to apply border-box layout to everything.
+  * {
+    @include box-sizing(content-box);
+  }
+  .stButton {
+    margin: 0 5px 0 0;
+  }
+}
+
+

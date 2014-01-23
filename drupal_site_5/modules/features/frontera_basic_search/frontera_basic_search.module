@@ -1,0 +1,291 @@
+<?php
+/**
+ * @file
+ * Code for the Frontera basic search feature.
+ */
+
+include_once 'frontera_basic_search.features.inc';
+
+/**
+ * implements hook_ctools_plugin_directory().
+ */
+function frontera_basic_search_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools' && in_array($plugin, array('content_types'))) {
+    return "plugins/$plugin";
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function frontera_basic_search_form_alter(&$form, &$form_state, $form_id, $view) {
+  if ($form_id == 'views_exposed_form') {
+    $view = $form_state['view'];
+    // only alter filters for search_solr view
+    if ($view->name == 'search_solr') {
+      unset($form['#info']['filter-search_api_multi_fulltext']);
+      $form['keywords']['#type'] = 'hidden';
+    }
+  }
+}
+
+/**
+ * Implements hook_search_api_alter_callback_info().
+ */
+function frontera_basic_search_search_api_alter_callback_info() {
+  $callbacks['frontera_basic_search_recording_index_fields'] = array(
+    'name' => t('Generate Recording custom index fields.'),
+    'description' => t('This is an Alter Callback implementation to add custom fields to Recordings nodes.'),
+    'class' => 'FronteraSearchRecordingIndexFields',
+  );
+
+  $callbacks['frontera_basic_search_artist_index_fields'] = array(
+    'name' => t('Generate Artist custom index fields.'),
+    'description' => t('This is an Alter Callback implementation to add custom fields to Artists terms.'),
+    'class' => 'FronteraSearchArtistIndexFields',
+  );
+
+  return $callbacks;
+}
+
+/**
+ * Build the entity bundles options for node & vocabulary.
+ */
+function frontera_basic_search_entity_bundle_options() {
+  $entity_bundles = &drupal_static(__FUNCTION__);
+  if (!isset($entity_bundles)) {
+    $entity_bundles = node_type_get_names();
+    foreach (taxonomy_vocabulary_get_names() as $machine_name => $vocabulary) {
+      $entity_bundles[$machine_name] = $vocabulary->name;
+    }
+  }
+  return($entity_bundles);
+}
+
+/**
+ * Map the human readable name of a entity bundle.
+ */
+function frontera_basic_search_bundle_human_readable($machine_name) {
+  $bundles = frontera_basic_search_entity_bundle_options();
+  return isset($bundles[$machine_name]) ? $bundles[$machine_name] : $machine_name;
+}
+
+/**
+ * Search API data alteration callback to dynamically create recording index fields.
+ */
+class FronteraSearchRecordingIndexFields extends SearchApiAbstractAlterCallback {
+  public function alterItems(array &$items) {
+    foreach ($items as $id => &$item) {
+      if (isset($item->title)) {
+        // clone title to string field
+        $items[$id]->field_title_fulltext = $item->title;
+      }
+
+      if ($item->type == 'recording') {
+        $artist_names = array();
+        // wrap the node to easier property access
+        $node_wrapper = entity_metadata_wrapper('node', $item);
+        // Populate dynamic index fields
+        if (isset($item->field_title_of_album) && !empty($item->field_title_of_album)) {
+          $album = $node_wrapper->field_title_of_album->value();
+          $items[$id]->field_recording_album_fulltext = $album->title;
+        }
+
+        if (isset($item->field_artist_real_name) && !empty($item->field_artist_real_name)) {
+          $artists = $node_wrapper->field_artist_real_name->value();
+          foreach ($artists as $artist) {
+            $items[$id]->field_recording_artist_name_fulltext[] = $artist->title;
+            $artist_names[] = $artist->title;
+          }
+          $items[$id]->field_recording_artist_name_string = implode(', ', $artist_names);
+        }
+
+        if (isset($item->field_record_label_t) && !empty($item->field_record_label_t)) {
+          $label = $node_wrapper->field_record_label_t->value();
+          $items[$id]->field_recording_label_fulltext = $label->name;
+          $items[$id]->field_recording_label_string = $label->name;
+        }
+
+        if (isset($item->field_label_song_type) && !empty($item->field_label_song_type)) {
+          $genres = $node_wrapper->field_label_song_type->value();
+          foreach ($genres as $genre) {
+            $items[$id]->field_recording_genre[] = $genre->name;
+          }
+        }
+
+        if (isset($item->field_keyword) && !empty($item->field_keyword)) {
+          $subjects = $node_wrapper->field_keyword->value();
+          foreach ($subjects as $subject) {
+            $items[$id]->field_recording_subject[] = $subject->name;
+          }
+        }
+
+        if (isset($item->field_composer) && !empty($item->field_composer)) {
+          $composer = $node_wrapper->field_composer->value();
+          $items[$id]->field_recording_composer_string = $composer->title;
+        }
+
+        // glossary field only allow A-Z letters
+        $letter = strtoupper($item->title[0]);
+        if (preg_match("/^[A-Z]$/", $letter)) {
+          $items[$id]->field_recording_glossary_index = $letter;
+        }
+        // cloned title as string index field
+        $items[$id]->field_recording_title_fulltext = $item->title;
+      }
+
+      $items[$id]->field_entity_bundle = frontera_basic_search_bundle_human_readable($item->type);
+    }
+  }
+
+  public function propertyInfo() {
+    return array(
+     // fulltext for autocomplete
+      'field_title_fulltext' => array(
+        'label' => t('Title (fulltext)'),
+        'description' => t('Title cloned from node as (fulltext) to allow search.'),
+        'type' => 'text',
+      ),
+     'field_recording_album_fulltext' => array(
+        'label' => t('Recording Album Name (fulltext)'),
+        'description' => t('Album Name cloned from Container content type and indexed as (fulltext) to allow use of searchapi autocomplete.'),
+        'type' => 'text',
+      ),
+     'field_recording_artist_name_fulltext' => array(
+        'label' => t('Recording Artist Name (fulltext)'),
+        'description' => t('Artist Name cloned from Name content type and indexed as (fulltext) to allow use of searchapi autocomplete.'),
+        'type' => 'list<text>',
+      ),
+     'field_recording_label_fulltext' => array(
+        'label' => t('Recording Label (fulltext)'),
+        'description' => t('Label cloned from Label vocabulary and indexed as (fulltext) to allow use of searchapi autocomplete.'),
+        'type' => 'text',
+      ),
+     'field_recording_title_fulltext' => array(
+        'label' => t('Recording Title (fulltext)'),
+        'description' => t('Title cloned from indexed node as (fulltext) to allow use of searchapi autocomplete.'),
+        'type' => 'text',
+      ),
+     'field_recording_genre' => array(
+        'label' => t('Recording Genre (fulltext)'),
+        'description' => t('Genre cloned from indexed node as (fulltext) to allow use of searchapi autocomplete.'),
+        'type' => 'list<text>',
+      ),
+     'field_recording_subject' => array(
+        'label' => t('Recording Subject (fulltext)'),
+        'description' => t('Subject cloned from indexed node as (fulltext) to allow use of searchapi autocomplete.'),
+        'type' => 'list<text>',
+      ),
+      // strings for sort
+      'field_recording_artist_name_string' => array(
+        'label' => t('Recording Artist Name (string)'),
+        'description' => t('Artist Name cloned from Name content type and indexed as (string) to allow sort.'),
+        'type' => 'string',
+      ),
+     'field_recording_label_string' => array(
+        'label' => t('Recording Label (string)'),
+        'description' => t('Title cloned from Label vocabulary as (string) to allow sort.'),
+        'type' => 'string',
+      ),
+     'field_recording_composer_string' => array(
+        'label' => t('Recording Composer (string)'),
+        'description' => t('Composer cloned from indexed node as (string) to allow sort.'),
+        'type' => 'string',
+      ),
+     'field_recording_glossary_index' => array(
+        'label' => t('Recording Glossary Index'),
+        'description' => t('First letter index glossary.'),
+        'type' => 'string',
+      ),
+     'field_entity_bundle' => array(
+        'label' => t('Entity Bundle'),
+        'description' => t('This is a custom bundle type that unify the node bundle + term vocabulary to use a single type filter.'),
+        'type' => 'string',
+        'options list' => 'frontera_basic_search_entity_bundle_options',
+      ),
+    );
+  }
+}
+
+/**
+ * Search API data alteration callback to dynamically create label index fields.
+ */
+class FronteraSearchArtistIndexFields extends SearchApiAbstractAlterCallback {
+  public function alterItems(array &$items) {
+    foreach ($items as $id => &$item) {
+      if ($item->type == 'name') {
+        $artist_references = frontera_catalog_search_artist_references($item->nid);
+        $items[$id]->field_artist_composed_count = $artist_references['count_composed'];
+        $items[$id]->field_artist_recordings_count = $artist_references['count_recordings'];
+        $items[$id]->field_artist_labels = $artist_references['labels'];
+        $items[$id]->field_artist_label_tids = $artist_references['label_tids'];
+        $items[$id]->field_artist_genres = $artist_references['genres'];
+        $items[$id]->field_artist_subjects = $artist_references['subjects'];
+        $items[$id]->field_artist_images_count = count($item->field_images);
+        $items[$id]->field_artist_song_titles = $artist_references['songs'];
+        $items[$id]->field_artist_artist_name = $item->title;
+
+        // glossary field only allow A-Z letters
+        $letter = strtoupper($item->title[0]);
+        if (preg_match("/^[A-Z]$/", $letter)) {
+          $items[$id]->field_artist_glossary_index = $letter;
+        }
+      }
+    }
+  }
+
+  public function propertyInfo() {
+    return array(
+      'field_artist_composed_count' => array(
+        'label' => t('Artist Composed Count'),
+        'description' => t('Count the recordings that reference a composer.'),
+        'type' => 'integer',
+      ),
+      'field_artist_recordings_count' => array(
+        'label' => t('Artist Recordings Count'),
+        'description' => t('Count the recordings that reference an artist.'),
+        'type' => 'integer',
+      ),
+      'field_artist_images_count' => array(
+        'label' => t('Artist Images Count'),
+        'description' => t('Count the images stored in the artist node.'),
+        'type' => 'integer',
+      ),
+      'field_artist_song_titles' => array(
+        'label' => t('Artist Song Titles'),
+        'description' => t('Song Titles of recording node that reference an artist or composer.'),
+        'type' => 'list<text>',
+      ),
+      'field_artist_artist_name' => array(
+        'label' => t('Arstist Artist Name'),
+        'description' => t('Artist Name stored as fulltext.'),
+        'type' => 'text',
+      ),
+      'field_artist_glossary_index' => array(
+        'label' => t('Artist Glossary Index'),
+        'description' => t('First letter index glossary.'),
+        'type' => 'string',
+      ),
+      'field_artist_labels' => array(
+        'label' => t('Artist Labels'),
+        'description' => t('Labels from recordings interpreted or composed by an artist.'),
+        'type' => 'list<text>',
+      ),
+      'field_artist_label_tids' => array(
+        'label' => t('Artist Labels Taxonomy Term IDS'),
+        'description' => t('Labels from recordings interpreted or composed by an artist.'),
+        'type' => 'list<integer>',
+      ),
+      'field_artist_genres' => array(
+        'label' => t('Artist Genres'),
+        'description' => t('Genres from recordings interpreted or composed by an artist.'),
+        'type' => 'list<text>',
+      ),
+      'field_artist_subjects' => array(
+        'label' => t('Artist Subjects'),
+        'description' => t('Subjects from recordings interpreted or composed by an artist.'),
+        'type' => 'list<text>',
+      ),
+    );
+  }
+}

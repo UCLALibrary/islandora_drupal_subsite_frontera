@@ -1,0 +1,24 @@
+/*
+ * Simplenews subscribe form.
+ */
+.simplenews-subscribe {
+  margin-top: .3em;
+  min-height: 1.5em;
+  position: relative;
+  .form-item-mail {
+    margin-right: 7em;
+    label {
+      display: none;
+    }
+    input {
+      border: 1px solid $border-color;
+      width: 100%;
+      padding: 3px;
+    }
+  }
+  .form-submit {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+}

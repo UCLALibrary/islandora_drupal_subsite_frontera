@@ -1,0 +1,15 @@
+.l-header {
+  background: url(../images/bg-header-bar.png) repeat-x 0 0;
+  .pane-page-logo {
+    background: url(../images/header-discs.png) no-repeat 0 bottom;
+    padding: 18px 0 69px;
+    #logo {
+      display: block;
+    }
+    img {vertical-align:middle;}
+  }
+}
+.l-utility {
+  height: 38px;
+  overflow: hidden;
+}

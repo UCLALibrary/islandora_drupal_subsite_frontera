@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Frontera Promotional Block feature.
+ */
+
+include_once 'frontera_promotional_block.features.inc';

@@ -1,0 +1,32 @@
+<?php
+
+/**
+ * Implements hook_init().
+ */
+function frontera_tipsy_init() {
+  drupal_add_library('frontera_tipsy', 'frontera_tipsy', TRUE);
+}
+
+/**
+ * Implements hook_library().
+ */
+function frontera_tipsy_library() {
+  $libraries = array();
+  $libraries['frontera_tipsy'] = array(
+    'title' => 'Frontera Tipsy',
+    'version' => '1.0',
+    'js' => array(
+      drupal_get_path('module', 'frontera_tipsy') . '/js/jquery.tipsy.js' => array(),
+      drupal_get_path('module', 'frontera_tipsy') . '/js/frontera_tipsy.js' => array(),
+    ),
+    'css' => array(
+      drupal_get_path('module', 'frontera_tipsy') . '/css/tipsy.css' => array(
+        'type' => 'file',
+        'media' => 'screen',
+      ),
+    ),
+  );
+
+  return $libraries;
+}
+

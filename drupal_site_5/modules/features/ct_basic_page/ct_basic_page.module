@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Frontera Basic Page feature.
+ */
+
+include_once 'ct_basic_page.features.inc';

@@ -1,0 +1,16 @@
+name = Views Frontera
+description = "A module that implements views plugin and handler."
+core = 7.x
+package = Frontera
+version = "7.x-1.0"
+project = "views_frontera"
+
+dependencies[] = views
+dependencies[] = efq_views
+
+;files[] = views_frontera_plugin_style.inc
+files[] = views_frontera_plugin_query.inc
+files[] = views_frontera_handler_sort.inc
+files[] = views_handler_area_glossary.inc
+files[] = views_handler_area_string_link.inc
+files[] = views_handler_area_no_results.inc

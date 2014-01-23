@@ -1,0 +1,17 @@
+.page-taxonomy-term-label {
+  .page-title {
+    display: none;
+  }
+  .pane-page-title h1 {
+    margin-bottom: 24px;
+  }
+  .region-complementary {
+    @extend %bg-box-gradient;
+    .panel-pane:first-child {
+      .pane-title {
+        margin-top: 0;
+      }
+    }
+  }
+}
+

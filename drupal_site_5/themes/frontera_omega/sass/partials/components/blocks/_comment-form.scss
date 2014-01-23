@@ -1,0 +1,19 @@
+/**
+ * Comment form theming.
+ */
+.comment-form {
+  .form-type-item { // Hide "Your Name" field for logged in users.
+    display: none;
+  }
+  .form-submit {
+    margin: .6em 1em 0 0;
+  }
+}
+
+.not-logged-in {
+  .comment-form {
+    .filter-wrapper { // Hide filter tips for anonymous users.
+      display: none;
+    }
+  }
+}

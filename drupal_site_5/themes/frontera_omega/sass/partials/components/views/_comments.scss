@@ -1,0 +1,30 @@
+
+.pane-node-comment-form .pane-title,
+.pane-commenti-panel-pane-1 .pane-title {
+  margin-top: 50px;
+}
+
+
+.view-commenti {
+  .views-field-subject {
+    margin-top: 15px;
+    margin-bottom: -5px;
+    a {
+      color: #000;
+      text-decoration: none;
+    }
+  }
+  .views-field-name,
+  .views-field-created {
+    font-size: 12px;
+  }
+  .views-label  {
+    font-weight: normal;
+  }
+  .views-field-comment-body {
+    margin-bottom: 35px;
+    p {
+      margin-top: 10px;
+    }
+  }
+}

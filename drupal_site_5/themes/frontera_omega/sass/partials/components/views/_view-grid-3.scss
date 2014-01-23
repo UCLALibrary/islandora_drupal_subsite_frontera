@@ -1,0 +1,24 @@
+
+/**
+ * Views related to 3-up disc display.
+ */
+.view-name-recorded-composed,
+.view-image-gallery-recording,
+.view-name-recorded-recordings,
+.view-label-recordings-taxonomy {
+  td {
+    width: 30%;
+    padding-right: 3%;
+  }
+  .views-field-field-images {
+    .field-content {
+      background: url(../images/noimage.png) no-repeat;
+      background-size: cover;
+      width: 127px;
+      height: 127px;
+    }
+  }
+  img {
+    height: auto;
+  }
+}

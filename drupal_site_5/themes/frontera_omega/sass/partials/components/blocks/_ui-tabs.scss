@@ -1,0 +1,65 @@
+// Override default tabs JQuery UI theme.
+#tabs-0-details,
+.ui-tabs {
+  border: none;
+  padding: 0;
+}
+
+// Tabs navigation.
+#tabs-0-details ul,
+.ui-tabs .ui-tabs-nav {
+  @extend %serif-font;
+  border: none;
+  padding: 0;
+  background: #f0f0ea;
+  li {
+    border-left: none;
+    border-top: none;
+    border-right: 4px solid #f0f0ea;
+    margin: 0;
+    padding: 0;
+    top: 0;
+    background: #f0f0ea;
+    a {
+      color: #015f8d;
+      border-top: 4px solid #a3a3a3;
+      padding: .5em 1.5em;
+    }
+    &:hover,
+    &:focus,
+    &:active,
+    &.ui-state-hover {
+      background: #f8f8f5;
+      a {
+        border-top-color: #8c8c8c;
+      }
+    }
+    &.ui-tabs-selected {
+      border-right-color: #fff;
+      background: #fff;
+      padding: 0;
+      a {
+        border-top-color: #015f8d;
+        cursor: default;
+        color: #090909;
+      }
+    }
+  }
+}
+
+  // Tabs content.
+.ui-tabs .ui-tabs-panel {
+  padding: 0 0;
+  .panel-pane {
+    margin-top: 30px;
+  }
+  .panel-pane .panel-pane:first-child {
+    margin-top: 0;
+  }
+  .pane-title {
+    margin-top: 0;
+  }
+}
+
+
+

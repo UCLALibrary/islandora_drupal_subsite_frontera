@@ -1,0 +1,49 @@
+.node-type-recording {
+  .page-title {
+    display: none;
+  }
+  .pane-node-title {
+    margin-bottom: -0.2em;
+  }
+  .pane-performers-list {
+    margin-bottom: 10px;
+  }
+  .pane-sharethis-sharethis-block,
+  .pane-jwplayer-render-link-sample,
+  .pane-jwplayer-render-link-full,
+  .pane-recording-top-page-panel-pane-1,
+  .pane-recording-top-page-panel-pane-2 {
+    margin: 10px 0;
+  }
+  .pane-jwplayer-render-link-sample {
+    width: 46%;
+    float: left;
+  }
+  .pane-jwplayer-render-link-full {
+    float: right;
+    width: 46%;
+  }
+  .pane-recording-top-page-panel-pane-1 {
+    clear: both;
+  }
+  .jw-player-label {
+    font-weight: bold;
+  }
+  .region-complementary {
+    @extend %bg-box-gradient;
+    .panel-pane:first-child {
+      .pane-title {
+        margin-top: 0;
+      }
+    }
+  }
+}
+#mini-panel-recording_tab_details {
+  .view-recording-details {
+    margin-bottom: 10px;
+  }
+}
+
+.view-name-recorded-recordings {
+  line-height: 1.2em;
+}

@@ -1,0 +1,10 @@
+.l-main {
+  background: $main-bg-color;
+}
+.l-content {
+  background: white;
+  border: 1px solid $border-color;
+  border-top-color: $main-bg-color;
+  border-bottom: none;
+  padding: 34px 40px 44px;
+}

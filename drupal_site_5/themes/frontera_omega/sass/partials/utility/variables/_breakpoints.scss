@@ -1,0 +1,19 @@
+
+
+// Various standard breakpoints.
+$widescreen : 1280px;
+$desktop    : 980px;
+$narrow     : 768px; // this also serves for tablets in landscape mode
+$tablet     : 480px;
+$mobile     : 321px;
+$tiny       : 320px;
+
+
+// Media Layouts are a way to specify a breakpoint and a number of columns at
+// once for use with 'at-breakpoint($media-layout)'.
+// See http://susy.oddbird.net/guides/reference/#ref-media-layouts
+$desktop-only  : $desktop 16 ($widescreen - 1);
+$narrow-only   : $narrow 16 ($desktop - 1);
+$tablet-only   : $tablet 16 ($narrow - 1);
+$mobile-only   : $mobile 16 ($tablet - 1);
+$tiny-only     : 16 $tiny;

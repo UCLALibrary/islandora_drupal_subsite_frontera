@@ -1,0 +1,236 @@
+<?php
+/**
+ * @file
+ * Code for the Content Type Recording feature.
+ */
+
+include_once 'ct_recording.features.inc';
+
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function ct_recording_ctools_plugin_directory($owner, $plugin_type) {
+  if ($owner == 'ctools' && $plugin_type == 'content_types') {
+    return 'plugins/content_types';
+  }
+}
+
+/**
+ * hook feature post revert - I needs to intercept post revert operation made on page_manager_handlers componet
+ */
+
+/*function ct_recording_post_features_revert($component){
+	if($component == "page_manager_handlers"){
+		watchdog('ct_recording', 'ecco il revert della feature ct_recording');
+		// if page_manager_handlers is just been reverted,
+		// load its panel page and save it to have tab title correctly setted
+		
+		// $task = page_manager_get_task("node_view");
+
+		$page = page_manager_get_page_cache("node_view");
+
+		$handlers = page_manager_load_task_handlers($page->task);
+		
+		// node_view__recording -> Recording content type
+		if(isset($handlers['node_view__recording'])){
+			$handler = $handlers['node_view__recording'];
+			page_manager_save_task_handler($handler);
+		}
+	}
+}*/
+
+/**
+ * Generates a block of html for a player and adds the js required.
+ *
+ * @param $node
+ * @param $type
+ * @return string
+ */
+function ct_recording_get_player_output($node, $type) {
+  $output = '';
+
+  if (is_not_allowed_ip(ip_address()) && $type == 'full') {
+    return;
+  }
+
+  // Check that the node has transfer file name
+  if (isset($node->field_transfer_file_name[$node->language])) {
+    drupal_add_js(libraries_get_path('jwplayer') . '/jwplayer.js');
+
+    // Get and process the filename from the transfer field
+    $filename = ct_recording_jw_player_get_filename($node);
+
+    // to control how to draw jwplayer here we use an array of parameters
+    $params = array();
+
+    // Common params for sample and full recordings
+    $params['primary'] = "flash";
+    $params['height'] = 30;
+    $params['width'] = '100%';
+
+    $type_labels = array(
+      'sample' => t('50 Second Sample'),
+      'full' => t('Full Track'),
+    );
+
+    $type_label = $type_labels[$type];
+
+    // Generate a unique id for the player object
+    $params['id'] = uniqid('jwplayer_');
+
+    // Fill the source parameters
+    ct_recording_jw_player_source_params($params, $filename, $type);
+
+    // Html placeholder, the jw-player-loading class gets removed after
+    // the object is loaded.
+    $output .= '<div class="jw-player-label">' . $type_label . '</div>';
+    $output .= '<div class="jw-player-wrapper">';
+    $output .= '<div class="jw-player-loading" id="' . $params['id'] . '">Loading Player ... </div>';
+    $output .= '</div>';
+
+    // Add the js
+    ct_recording_jw_player_add_inline_js($params);
+
+  }
+
+  return $output;
+}
+
+/**
+ * Takes the transfer file name from the node and builds complete audio file name
+ *
+ * @param $node
+ * @return string
+ */
+function ct_recording_jw_player_get_filename($node) {
+  // Take the transfer name from the transfer file name
+  $transfer_name = $node->field_transfer_file_name[$node->language][0]['value'];
+
+  // Add _a.mp3 to all files
+  $transfer_name .= '_a.mp3';
+
+  // Convert to lowercase, all filenames are lowercase
+  $transfer_name = strtolower($transfer_name);
+
+  return $transfer_name;
+}
+
+/**
+ * Fill the params array with the source urls for the audio files.
+ *
+ * @param array $params
+ *  The current $params array, by reference, will be filled with new params.
+ * @param $filename
+ *  The mp3 filename as returned by ct_recording_jw_player_get_filename
+ * @param $type
+ *  'sample' will fill the urls for the audio sample, otherwise the full audio url
+ *  is returned.
+ */
+function ct_recording_jw_player_source_params(&$params, $filename, $type) {
+  if ($type == 'sample') {
+    $playlist_base = 'http://stream.library.ucla.edu:1935/dlp/_definst_/mp3:frontera/';
+    $mp3_base = 'rtmp://stream.library.ucla.edu/dlp/mp3:frontera/';
+  }
+  else {
+    // FULL PLAYER
+    $playlist_base = 'http://stream.library.ucla.edu:1935/frontera/mp3:';
+    $mp3_base = 'rtmp://stream.library.ucla.edu/frontera/mp3:';
+  }
+
+  // Sources that will be used by the player, playlist and mp3 file
+  $playlist_source = $playlist_base . $filename . '/playlist.m3u8';
+  $mp3_source = $mp3_base . $filename;
+
+  $params['playlist_source'] = $playlist_source;
+  $params['mp3_source'] = $mp3_source;
+}
+
+/**
+ * Adds the inline js to create the player using the params provided.
+ *
+ * @param $params
+ */
+function ct_recording_jw_player_add_inline_js($params) {
+  $settings = array(
+    'ct_recordings' => array(
+      $params['id'] => array(
+        'player_id' => $params['id'],
+        'playlist_source' => $params['playlist_source'],
+        'mp3_source' => $params['mp3_source'],
+        'primary' => $params['primary'],
+        'height' => $params['height'],
+        'width' => $params['width'],
+      ),
+    ),
+  );
+
+  drupal_add_js($settings, 'setting');
+  drupal_add_js(drupal_get_path('module', 'ct_recording') . '/ct_recording.js');
+}
+
+/**
+ * Check if the current client's IP is between the allowed IPs or in a allowed network
+ *
+ * @param string $curr_ip
+ *  The current client's IP.
+ * @return bool
+ *  FALSE if the IP is allowed, TRUE otherwise.
+ */
+function is_not_allowed_ip($curr_ip) {
+  $ip_blocker_settings = variable_get('ip_blocker_settings', array());
+
+  if (empty($ip_blocker_settings)) {
+    if (user_access('administer site configuration')) {
+      drupal_set_message("ip_blocker_settings must be defined as array into the setting.php file.", 'error');
+    }
+
+    return;
+  }
+
+  $allowed_ip_networks = $ip_blocker_settings['allowed_ip_networks'];
+  $allowed_single_ips = $ip_blocker_settings['allowed_single_ips'];
+  $debug = $ip_blocker_settings['show_debug_info'];
+
+  foreach ($allowed_ip_networks as $ip => $cidr) {
+    if (get_ip_by_netmask($curr_ip, $cidr) == $ip) {
+      if ($debug) {
+        drupal_set_message("The IP: " . $curr_ip . " is in a valid network.");
+      }
+
+      return false;
+    }
+  }
+  
+  if (in_array($curr_ip, $allowed_single_ips)) {
+    if ($debug) {
+      drupal_set_message("The single IP: " . $curr_ip . " is valid.");
+    }
+    
+    return false;
+  }
+
+  if ($debug){
+    drupal_set_message("The single IP: " . $curr_ip . " is NOT valid.", 'warning');
+  }
+
+  return true;
+}
+
+/**
+ * Returns a bitmasked IP
+ *
+ * Thanks to http://forum.codecall.net/topic/58903-php-get-network-address-from-ip/?p=573539
+ *
+ * @param string $ip
+ *  The IP to be bitmasked.
+ * @param int $cidr
+ *  The CIDR used to apply a bitmask to the given IP.
+ */
+function get_ip_by_netmask($ip, $cidr) {
+  if ($cidr == 32)
+    return $ip;
+
+  $bitmask = $cidr == 0 ? 0 : 0xffffffff << (32 - $cidr);
+  return long2ip(ip2long($ip) & $bitmask);
+}

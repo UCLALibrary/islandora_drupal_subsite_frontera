@@ -1,0 +1,37 @@
+
+.pager,
+.alpha-pager {
+  margin: 30px 0 0;
+  position: relative;
+  padding-right: 20px;
+  .throbber {
+    position: absolute;
+    right: 0;
+  }
+}
+
+.view-header .alpha-pager {
+  margin-bottom: 30px;
+}
+
+
+.pager__item {
+  padding: 0;
+}
+.pager__item a,
+.pager__item--current,
+.pager__item--ellipsis {
+  padding: .1em .5em .3em;
+  border: 1px solid $border-color;
+  text-decoration: none;
+}
+.pager__item a:hover,
+.pager__item--current {
+  border-color: $button-color;
+  background-color: $button-color;
+  text-decoration: none;
+  color: white;
+}
+.pager__item--ellipsis {
+  border-color: white;
+}

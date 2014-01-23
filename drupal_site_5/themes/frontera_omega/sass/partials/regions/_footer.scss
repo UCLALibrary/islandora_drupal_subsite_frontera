@@ -1,0 +1,82 @@
+/*
+ * Footer first column styles.
+ */
+.footer-column--first {
+  background: #000;
+  max-width: 100%;
+  padding: 25px 0 15px;
+  text-align: center;
+}
+.footer-column--last {
+  background: #fff;
+  font: 1.154em/30px Arial, Helvetica, sans-serif;
+  max-width: 100%;
+  text-align: center;
+}
+
+/**
+ * Footer menu.
+ */
+.pane-menu-menu-footer {
+  .pane-content {
+    display: table;
+    margin: 0 auto;
+  }
+  .menu {
+    margin: 25px auto 0;
+    padding: 0;
+    li {
+      display: inline;
+      white-space: nowrap;
+      a:link,
+      a:visited {
+        @extend %sans-serif-condensed-font;
+        color: #93a79d;
+        font-size: 2.154em;
+        line-height: 30px;
+        padding: 0 18px;
+        text-decoration: none;
+      }
+      a:hover,
+      a:active {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+/**
+ * Footer image links.
+ */
+#footer-link-1,
+#footer-link-2,
+#footer-link-3 {
+  display: block;
+  margin: 0 auto;
+  text-indent: -9000px;
+  width: 94px;
+}
+#footer-link-1 {
+  background: url(../images/footer-img-link-1.png) no-repeat 0 0;
+  height: 52px;
+}
+#footer-link-2 {
+  background: url(../images/footer-img-link-2.png) no-repeat 0 0;
+  height: 58px;
+}
+#footer-link-3 {
+  background: url(../images/footer-img-link-3.png) no-repeat 0 0;
+  height: 48px;
+}
+
+/**
+ * Footer first style.
+ */
+.pane-bean-footer-first {
+  .pane-content {
+    @extend %sans-serif-condensed-font;
+    font-size: 1.308em;
+    line-height: 27px;
+    color: #fff;
+  }
+}

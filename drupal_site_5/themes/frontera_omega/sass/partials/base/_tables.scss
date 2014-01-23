@@ -1,0 +1,81 @@
+th {
+  position: relative;
+  padding: .5em 8px .5em 10px;
+  background: $button-color;
+  @extend %serif-font;
+  font-weight: normal;
+  &, a, a.active {
+    color: white;
+    white-space: nowrap; // by default, dont let headings wrap (there may be exceptions)
+  }
+  a {
+    display: block;
+    text-decoration: none;
+    background: url(../images/sort-sortable.png) no-repeat 100% 50%;
+    padding-right: 20px;
+  }
+  a:hover, a:active, a:focus {
+    color: white;
+    text-decoration: underline;
+    background-image: url(../images/sort-sortable-hover.png);
+    cursor: pointer;
+  }
+  &.active {
+    position: relative;
+    a.active {
+      padding-right: 20px;
+      background: none;
+      position: relative;
+    }
+    img {
+      position: absolute;
+      top: 0;
+      right: 0;
+      display: block;
+      margin-top: .5em;
+      margin-left: .3em;
+    }
+  }
+  .ajax-progress {
+    position: absolute;
+    top: 8px;
+    right: 5px;
+    height: 1em;
+    background: $button-color;
+    .throbber {
+      background:  $button-color url(../images/throbber.gif?1) no-repeat 0 0;
+    }
+  }
+}
+
+td {
+  padding: .3em 8px .3em 12px;
+}
+tr.even, tr.odd {
+  background-color: #fff;
+}
+tr.odd {
+  background-color: #f0f0ea;
+}
+td.active {
+  background-color: inherit;
+}
+
+.views-table,
+%table-border {
+  border: 1px solid $border-color;
+  width: 100%;
+  th {
+    //border-right: 1px solid $border-color;
+  }
+  td {
+    border-right: 1px solid $border-color;
+  }
+}
+.views-view-grid {
+  width: 100%;
+  td {
+    padding: 0 0 15px;
+    vertical-align: top;
+  }
+}

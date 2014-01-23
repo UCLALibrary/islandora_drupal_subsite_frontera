@@ -1,0 +1,409 @@
+<?php
+/**
+ * @file
+ * Code for the Frontera Catalog Search feature.
+ */
+
+include_once 'frontera_catalog_search.features.inc';
+
+/**
+ * Implements hook_views_plugins().
+ */
+function frontera_catalog_search_views_plugins() {
+  return array(
+    'query' => array(
+      'frontera_search_api_views_query' => array(
+        'handler' => 'FronteraSearchApiViewsQuery',
+        'parent' => 'search_api_views_query',
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_views_data_alter()
+ */
+function frontera_catalog_search_views_data_alter(&$data) {
+  $data['search_api_index_frontera_taxonomy_index']['table']['base']['query class'] = 'frontera_search_api_views_query';
+}
+
+/**
+ * Implements hook_entity_views_field_handlers_alter().
+ *
+ * By default the searchapi properties declared as string are not initialized
+ * as views field handlers by entity_views_field_definition that only detects
+ * the text properties. Unfortunately text properties are not allowed to sort by
+ * _search_api_views_add_handlers so we need to do this trick.
+ */
+function frontera_catalog_search_entity_views_field_handlers_alter(&$field_handlers) {
+  $field_handlers['string'] = 'entity_views_handler_field_text';
+}
+
+/**
+ * Implements hook_search_api_solr_query_alter().
+ */
+function frontera_catalog_search_search_api_solr_query_alter(array &$call_args, SearchApiQueryInterface &$query) {
+  $call_args['params']['fl'] .= ',is_field_label_artists_count,is_field_label_recordings_count,is_field_label_images_count';
+  $call_args['params']['fl'] .= ',is_field_artist_composed_count,is_field_artist_recordings_count,is_field_artist_images_count';
+  $call_args['params']['fl'] .= ',ss_field_entity_bundle,tm_field_recording_subjects,tm_field_recording_genres,tm_field_artist_labels';
+  $call_args['params']['fl'] .= ',ss_field_recording_artist_name_string,ss_field_recording_composer_string,ss_field_recording_label_string';
+  $call_args['params']['fl'] .= ',tm_field_label_genres,tm_field_label_subjects';
+}
+
+/**
+ * Implements hook_search_api_solr_multi_query_alter()
+ */
+function frontera_catalog_search_search_api_solr_multi_query_alter(array &$call_args, SearchApiMultiQueryInterface &$query) {
+  $call_args['params']['fl'] .= ',ss_field_entity_bundle';
+}
+
+/**
+ * Retrieve the data of term filters that are stored in recording nodes.
+ */
+function frontera_catalog_search_label_term_references($tid) {
+  // get db info of required fields
+  $db_info_images = frontera_catalog_search_get_db_info_field('field_images');
+  $db_info_artist_real_name = frontera_catalog_search_get_db_info_field('field_artist_real_name');
+  $db_info_composer = frontera_catalog_search_get_db_info_field('field_composer');
+  $db_info_record_label_t = frontera_catalog_search_get_db_info_field('field_record_label_t');
+  $db_info_genre = frontera_catalog_search_get_db_info_field('field_label_song_type');
+  $db_info_subject = frontera_catalog_search_get_db_info_field('field_keyword');
+
+  // Get the entity info
+  $entity_info = entity_get_info('node');
+  $base_table = $entity_info['base table'];
+
+  if (empty($entity_info['base table']) && empty($entity_info['entity keys']['id'])) {
+    return array();
+  }
+
+  // Count all the artists referenced in the nodes that reference the current term
+  $query = db_select($base_table, 'e');
+  $query->fields('e', array('nid'));
+  $query->leftJoin($db_info_artist_real_name['table'], 'ac', "ac.{$db_info_artist_real_name['column']} = e.nid");
+  $query->innerJoin($db_info_record_label_t['table'], 'rlt', " ac.entity_id = rlt.entity_id");
+  $query->condition("rlt.{$db_info_record_label_t['column']}", $tid);
+  $query->condition('rlt.entity_type', 'node');
+  $query->condition('e.status', 1);
+  $artists_nids = array_unique(array_keys($query->execute()->fetchAllAssoc('nid')));
+
+  // Count all the composers referenced in the nodes that reference the current term
+  $query = db_select($base_table, 'e');
+  $query->fields('e', array('nid'));
+  $query->leftJoin($db_info_composer['table'], 'ac', "ac.{$db_info_composer['column']} = e.nid");
+  $query->innerJoin($db_info_record_label_t['table'], 'rlt', " ac.entity_id = rlt.entity_id");
+  $query->condition("rlt.{$db_info_record_label_t['column']}", $tid);
+  $query->condition('rlt.entity_type', 'node');
+  $query->condition('e.status', 1);
+  $composer_nids = array_unique(array_keys($query->execute()->fetchAllAssoc('nid')));
+
+  // join artists and composers to calculate the total artists for this term
+  $all_artists_nids = array_unique(array_merge($artists_nids, $composer_nids));
+  $count_artists = count($all_artists_nids);
+
+  // Count all the songs that reference the current term
+  $query = db_select($base_table, 'e');
+  $query->innerJoin($db_info_record_label_t['table'], 'rlt', 'rlt.entity_id = e.nid');
+  $query->condition("rlt.{$db_info_record_label_t['column']}", $tid);
+  $query->condition('rlt.entity_type', 'node');
+  $query->condition('e.status', 1);
+  $query->fields('e', array('nid'));
+  $songs_nids = array_unique(array_keys($query->execute()->fetchAllAssoc('nid')));
+  $count_songs = count($songs_nids);
+
+  // Count all the images referenced in the nodes that reference the current term
+  $query = db_select('taxonomy_term_data', 'e');
+  $query->innerJoin($db_info_images['table'], 'img', 'img.entity_id = e.tid');
+  $query->condition('e.tid', $tid);
+  $query->condition('img.entity_type', 'taxonomy_term');
+  $query->fields('img', array($db_info_images['column']));
+  $images = array_unique(array_keys($query->execute()->fetchAllAssoc($db_info_images['column'])));
+  $count_images = count($images);
+
+  // Genres that belong to current label
+  $base_table = $entity_info['base table'];
+  $query = db_select($base_table, 'e');
+  $query->innerJoin($db_info_record_label_t['table'], 'rlt', 'rlt.entity_id = e.nid');
+  $query->innerJoin($db_info_genre['table'], 'rg', 'rg.entity_id = e.nid');
+  $query->condition("rlt.{$db_info_record_label_t['column']}", $tid);
+  $query->condition('e.status', 1);
+  $query->fields('rg', array($db_info_genre['column']));
+  $genre_tids = array_unique(array_keys($query->execute()->fetchAllAssoc($db_info_genre['column'])));
+  $genre_terms = taxonomy_term_load_multiple($genre_tids);
+
+  // extract the genres terms names
+  foreach ($genre_terms as $term) {
+    $genres[] = $term->name;
+  }
+
+  // Subjects that belong to current label
+  $base_table = $entity_info['base table'];
+  $query = db_select($base_table, 'e');
+  $query->innerJoin($db_info_record_label_t['table'], 'rlt', 'rlt.entity_id = e.nid');
+  $query->innerJoin($db_info_subject['table'], 'rs', 'rs.entity_id = e.nid');
+  $query->condition("rlt.{$db_info_record_label_t['column']}", $tid);
+  $query->condition('e.status', 1);
+  $query->fields('rs', array($db_info_subject['column']));
+  $subject_tids = array_unique(array_keys($query->execute()->fetchAllAssoc($db_info_subject['column'])));
+  $subject_terms = taxonomy_term_load_multiple($subject_tids);
+
+  // extract the genres terms names
+  foreach ($subject_terms as $term) {
+    $subjects[] = $term->name;
+  }
+
+  // load all the artists
+  $artists = frontera_catalog_search_get_node_titles($artists_nids);
+  // load all the songs
+  $songs = frontera_catalog_search_get_node_titles($songs_nids);
+
+  return array(
+    'count_artists' => $count_artists,
+    'count_songs' => $count_songs,
+    'count_images' => $count_images,
+    'songs' => !empty($songs) ? $songs : array(),
+    'artists' => !empty($artists) ? $artists : array(),
+    'genres' => !empty($genres) ? $genres : array(),
+    'subjects' => !empty($subjects) ? $subjects : array(),
+  );
+}
+
+/**
+ * Retrieve the data of artist filters that are stored in recording nodes.
+ */
+function frontera_catalog_search_artist_references($nid) {
+  // get db info of required fields
+  $db_info_artist_real_name = frontera_catalog_search_get_db_info_field('field_artist_real_name');
+  $db_info_composer = frontera_catalog_search_get_db_info_field('field_composer');
+  $db_info_record_label_t = frontera_catalog_search_get_db_info_field('field_record_label_t');
+  $db_info_genre = frontera_catalog_search_get_db_info_field('field_label_song_type');
+  $db_info_subject = frontera_catalog_search_get_db_info_field('field_keyword');
+
+  // Get the entity info
+  $entity_info = entity_get_info('node');
+
+  if (empty($entity_info['base table']) && empty($entity_info['entity keys']['id'])) {
+    return array();
+  }
+
+  // Count all the recordings interpreted that are referencing the current artist node.
+  $base_table = $entity_info['base table'];
+  $query = db_select($base_table, 'e');
+  $query->innerJoin($db_info_artist_real_name['table'], 'arn', 'arn.entity_id = e.nid');
+  $query->condition("arn.{$db_info_artist_real_name['column']}", $nid);
+  $query->condition('e.status', 1);
+  $query->fields('e', array('nid'));
+  $recording_nids = array_unique(array_keys($query->execute()->fetchAllAssoc('nid')));
+  $count_recordings = count($recording_nids);
+
+  // Count all the recordings composed that are referencing the current artist node.
+  $base_table = $entity_info['base table'];
+  $query = db_select($base_table, 'e');
+  $query->innerJoin($db_info_composer['table'], 'arn', 'arn.entity_id = e.nid');
+  $query->condition("arn.{$db_info_composer['column']}", $nid);
+  $query->condition('e.status', 1);
+  $query->fields('e', array('nid'));
+  $composed_nids = array_unique(array_keys($query->execute()->fetchAllAssoc('nid')));
+  $count_composed = count($composed_nids);
+
+  // Recording labels that belong to current interpreter artist
+  $base_table = $entity_info['base table'];
+  $query = db_select($base_table, 'e');
+  $query->innerJoin($db_info_artist_real_name['table'], 'arn', 'arn.entity_id = e.nid');
+  $query->innerJoin($db_info_record_label_t['table'], 'rl', 'rl.entity_id = e.nid');
+  $query->condition("arn.{$db_info_artist_real_name['column']}", $nid);
+  $query->condition('e.status', 1);
+  $query->fields('rl', array($db_info_record_label_t['column']));
+  $label_tids_interpreted = array_unique(array_keys($query->execute()->fetchAllAssoc($db_info_record_label_t['column'])));
+  // Recording labels that belong to current composer artist
+  $base_table = $entity_info['base table'];
+  $query = db_select($base_table, 'e');
+  $query->innerJoin($db_info_composer['table'], 'arn', 'arn.entity_id = e.nid');
+  $query->innerJoin($db_info_record_label_t['table'], 'rl', 'rl.entity_id = e.nid');
+  $query->condition("arn.{$db_info_composer['column']}", $nid);
+  $query->condition('e.status', 1);
+  $query->fields('rl', array($db_info_record_label_t['column']));
+  $label_tids_composed = array_unique(array_keys($query->execute()->fetchAllAssoc($db_info_record_label_t['column'])));
+  // merge composed & interpreted labels tids
+  $label_tids = array_unique(array_merge($label_tids_interpreted, $label_tids_composed));
+  $label_terms = taxonomy_term_load_multiple($label_tids);
+  // extract the labels terms names
+  foreach ($label_terms as $term) {
+    $labels[] = $term->name;
+  }
+
+  // Genres that belong to current artist
+  $base_table = $entity_info['base table'];
+  $query = db_select($base_table, 'e');
+  $query->innerJoin($db_info_composer['table'], 'arn', 'arn.entity_id = e.nid');
+  $query->innerJoin($db_info_genre['table'], 'rg', 'rg.entity_id = e.nid');
+  $query->condition("arn.{$db_info_composer['column']}", $nid);
+  $query->condition('e.status', 1);
+  $query->fields('rg', array($db_info_genre['column']));
+  $genre_tids = array_unique(array_keys($query->execute()->fetchAllAssoc($db_info_genre['column'])));
+  $genre_terms = taxonomy_term_load_multiple($genre_tids);
+
+  // extract the genres terms names
+  foreach ($genre_terms as $term) {
+    $genres[] = $term->name;
+  }
+
+  // Subjects that belong to current artist
+  $base_table = $entity_info['base table'];
+  $query = db_select($base_table, 'e');
+  $query->innerJoin($db_info_composer['table'], 'arn', 'arn.entity_id = e.nid');
+  $query->innerJoin($db_info_subject['table'], 'rs', 'rs.entity_id = e.nid');
+  $query->condition("arn.{$db_info_composer['column']}", $nid);
+  $query->condition('e.status', 1);
+  $query->fields('rs', array($db_info_subject['column']));
+  $subject_tids = array_unique(array_keys($query->execute()->fetchAllAssoc($db_info_subject['column'])));
+  $subject_terms = taxonomy_term_load_multiple($subject_tids);
+
+  // extract the genres terms names
+  foreach ($subject_terms as $term) {
+    $subjects[] = $term->name;
+  }
+
+  // titles of all the recoding songs
+  $recording_songs = frontera_catalog_search_get_node_titles($recording_nids);
+  // titles of all the composed songs
+  $composed_songs = frontera_catalog_search_get_node_titles($composed_nids);
+  // merge recorded songs and composed songs of specific artist
+  $songs = array_unique(array_merge($recording_songs, $composed_songs));
+
+  return array(
+    'count_recordings' => $count_recordings,
+    'count_composed' => $count_composed,
+    'songs' => !empty($songs) ? $songs : array(),
+    'labels' => !empty($labels) ? $labels : array(),
+    'label_tids' => !empty($label_tids) ? $label_tids : array(),
+    'genres' => !empty($genres) ? $genres : array(),
+    'subjects' => !empty($subjects) ? $subjects : array(),
+  );
+}
+
+function frontera_catalog_search_get_db_info_field($field_name) {
+  $field = field_info_field($field_name);
+  $db_info = $field['storage']['details']['sql']['FIELD_LOAD_CURRENT'];
+  $tables = array_keys($db_info);
+  $table = array_shift($tables);
+  $column = array_shift($db_info[$table]);
+  return array('table' => $table, 'column' => $column);
+}
+
+function frontera_catalog_search_get_node_titles($nids) {
+  $titles = array();
+
+  if (!empty($nids)) {
+    $query = db_select('node', 'n');
+    $query->condition("n.nid", $nids, 'IN');
+    $query->condition('n.status', 1);
+    $query->fields('n', array('title'));
+    $result = $query->execute()->fetchAll();
+  }
+
+  if (!empty($result)) {
+    foreach ($result as $row) {
+      $titles[] = $row->title;
+    }
+  }
+
+  return $titles;
+}
+
+/**
+ * Implements hook_search_api_alter_callback_info().
+ */
+function frontera_catalog_search_search_api_alter_callback_info() {
+  $callbacks['frontera_catalog_search_label_index_fields'] = array(
+    'name' => t('Generate Label custom index fields.'),
+    'description' => t('This is an Alter Callback implementation to add custom fields to Labels terms.'),
+    'class' => 'FronteraSearchLabelIndexFields',
+  );
+
+  return $callbacks;
+}
+
+/**
+ * Search API data alteration callback to dynamically create artist index fields.
+ */
+class FronteraSearchLabelIndexFields extends SearchApiAbstractAlterCallback {
+  public function alterItems(array &$items) {
+    $vocabularies = taxonomy_get_vocabularies();
+    foreach ($items as $id => &$item) {
+      $term_references = frontera_catalog_search_label_term_references($item->tid);
+      $items[$id]->field_label_artists_count = $term_references['count_artists'];
+      $items[$id]->field_label_recordings_count = $term_references['count_songs'];
+      $items[$id]->field_label_images_count = $term_references['count_images'];
+      $items[$id]->field_label_artist_titles = $term_references['artists'];
+      $items[$id]->field_label_song_titles = $term_references['songs'];
+      $items[$id]->field_label_genres = $term_references['genres'];
+      $items[$id]->field_label_subjects = $term_references['subjects'];
+      $items[$id]->field_label_name_fulltext = $item->name;
+
+      // glossary field only allow A-Z letters
+      $letter = strtoupper($item->name[0]);
+      if (preg_match("/^[A-Z]$/", $letter)) {
+        $items[$id]->field_label_glossary_index = $letter;
+      }
+
+      $items[$id]->field_entity_bundle = frontera_basic_search_bundle_human_readable($vocabularies[$item->vid]->machine_name);
+    }
+  }
+
+  public function propertyInfo() {
+    return array(
+      'field_label_artists_count' => array(
+        'label' => t('Label Artists Count'),
+        'description' => t('Count the artist that are referenced in a recording nodes that reference the term.'),
+        'type' => 'integer',
+      ),
+      'field_label_recordings_count' => array(
+        'label' => t('Label Recordings Count'),
+        'description' => t('Count the recording nodes that reference the term.'),
+        'type' => 'integer',
+      ),
+      'field_label_images_count' => array(
+        'label' => t('Label Images Count'),
+        'description' => t('Count the images stored in the nodes that reference the term.'),
+        'type' => 'integer',
+      ),
+      'field_label_artist_titles' => array(
+        'label' => t('Label Artist Titles'),
+        'description' => t('Artist Titles of artists that are referenced in a recording nodes that reference the term.'),
+        'type' => 'list<text>',
+      ),
+      'field_label_song_titles' => array(
+        'label' => t('Label Song Titles'),
+        'description' => t('Song Titles of recording nodes that reference the term.'),
+        'type' => 'list<text>',
+      ),
+      'field_label_name_fulltext' => array(
+        'label' => t('Label Name (fulltext)'),
+        'description' => t('Name cloned from indexed term as (fulltext) to allow use of searchapi autocomplete.'),
+        'type' => 'text',
+      ),
+      'field_label_glossary_index' => array(
+        'label' => t('Label Glossary Index'),
+        'description' => t('First letter index glossary.'),
+        'type' => 'string',
+      ),
+      'field_entity_bundle' => array(
+        'label' => t('Entity Bundle'),
+        'description' => t('This is a custom bundle type that unify the node bundle + term vocabulary to use a single type filter.'),
+        'type' => 'string',
+        'options list' => 'frontera_basic_search_entity_bundle_options',
+      ),
+      'field_label_genres' => array(
+        'label' => t('Label Genres'),
+        'description' => t('Genres from recordings interpreted or composed by an label.'),
+        'type' => 'list<text>',
+      ),
+      'field_label_subjects' => array(
+        'label' => t('Label Subjects'),
+        'description' => t('Subjects from recordings interpreted or composed by an label.'),
+        'type' => 'list<text>',
+      ),
+    );
+  }
+}

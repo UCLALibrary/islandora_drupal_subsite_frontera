@@ -1,0 +1,41 @@
+/*
+ * Discover the Collection view.
+ */
+.pane-home-page-random-stuff h2 {
+  @extend %block-letter-heading;
+  margin-bottom: 25px;
+}
+
+.view-home-page-random-stuff {
+  line-height: 1.2em;
+  td {
+    padding: 0.3em 9px 15px;
+    position: relative;
+    &:first-child {
+      padding-left: 0;
+    }
+    &:last-child {
+      padding-right: 0;
+    }
+  }
+  .views-field-field-images {
+    width: 127px;
+    height: 127px;
+    margin-bottom: 5px;
+    overflow: hidden;
+    background: #d9d9d1;
+    img {
+      height: auto;
+      max-width: 127px;
+    }
+  }
+  .views-field-type {
+    position: absolute;
+    padding: 3px 5px;
+    color: #F0EEE2;
+    text-shadow: 0 0 1px #000;
+  }
+  .views-label {
+    font-weight: normal;
+  }
+}

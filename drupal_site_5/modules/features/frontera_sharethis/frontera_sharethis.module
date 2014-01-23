@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Frontera ShareThis feature.
+ */
+
+include_once 'frontera_sharethis.features.inc';

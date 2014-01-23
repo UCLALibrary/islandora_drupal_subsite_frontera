@@ -1,0 +1,31 @@
+<?php
+/**
+ * @file
+ * Code for the Content Type Carousel Slide feature.
+ */
+
+include_once 'ct_carousel_slide.features.inc';
+
+/**
+ * Implements hook_node_view().
+ */
+function ct_carousel_slide_node_view($node, $view_mode) {
+  global $user;
+
+  /**
+   * Anonymous users visiting a carousel node will be redirected to the link
+   * stored in the node.
+   */
+  if ($node->type == 'carousel_slide') {
+    if ($view_mode == 'full') {
+      $url = $node->field_carousel_slide_link[LANGUAGE_NONE][0]['url'];
+      if ($user->uid) {
+        drupal_set_message(t('Anonymous users visiting this node will be redirected to @url.',
+          array('@url' => $url)), 'warning');
+      }
+      else {
+        drupal_goto($url);
+      }
+    }
+  }
+}

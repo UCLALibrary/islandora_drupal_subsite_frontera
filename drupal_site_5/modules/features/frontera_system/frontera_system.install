@@ -1,0 +1,445 @@
+<?php
+
+/**
+ * Enable modules for FRONTERA-10.
+ */
+function frontera_system_update_7101() {
+  $mods = array(
+    'efq_views',
+    'views_frontera'
+  );
+  module_enable($mods);
+}
+
+/**
+ * Enable modules for FRONTERA-20.
+ */
+function frontera_system_update_7102(){
+  $mods = array(
+    'link'
+  );
+  module_enable($mods);
+}
+
+/**
+ * Enable multiselect facets widget and dependencies.
+ */
+function frontera_system_update_7103(){
+  $mods = array(
+    'facetapi_multiselect',
+    'select_2_integration',
+    'jquery_update'
+  );
+  module_enable($mods);
+
+  // javascript library select2 needs at least jquery 1.7
+  variable_set('jquery_update_jquery_version', '1.7');
+}
+
+/**
+ * Enable panels_style_pack for use tabs into panels.
+ */
+function frontera_system_update_7104(){
+  $mods = array(
+    'panels_style_pack'
+  );
+  module_enable($mods);
+}
+
+/**
+ * Enable views_frontera custom module.
+ */
+function frontera_system_update_7105(){
+  $mods = array(
+    'views_frontera'
+  );
+  module_enable($mods);
+}
+
+/**
+ * Enables the rewrite of nodes with the panel's variants.
+ */
+function frontera_system_update_7106() {
+  variable_set('page_manager_node_view_disabled', FALSE);
+  $GLOBALS['page_manager_enabling_node_view'] = TRUE;
+}
+
+/**
+ * Enable images gallery view's module dependencies.
+ */
+function frontera_system_update_7107(){
+  $mods = array(
+    'colorbox',
+    'views_infinite_scroll'
+  );
+  module_enable($mods);
+}
+
+/**
+ * Enable promotional block feature and dependencies.
+ */
+function frontera_system_update_7108(){
+  $mods = array(
+    'nodequeue',
+    'fe_nodequeue',
+    'frontera_promotional_block'
+  );
+  module_enable($mods);
+}
+
+/**
+ * Enable Frontpage feature.
+ */
+function frontera_system_update_7109(){
+  $mods = array(
+    'frontera_home_page'
+  );
+  module_enable($mods);
+}
+
+/**
+ * Enable jump to recording and related.
+ */
+function frontera_system_update_7110() {
+  $mods = array(
+    'computed_field',
+    'frontera_jump_to_rec'
+  );
+  module_enable($mods);
+}
+
+// BURNED
+//function frontera_system_update_7111() {
+//}
+
+/**
+ * The new computed field needs to resave nodes
+ */
+function frontera_system_update_7112() {
+  $query = db_select('node', 'n')
+    ->condition('n.type', 'recording', '=')
+    ->fields('n', array('nid'));
+
+  $return = $query->execute();
+
+  foreach ($return as $row) {
+    $node = node_load($row->nid);
+    node_save($node);
+  }
+}
+
+ /**
+  * Enable Mailing List / Newsletter functionality.
+  */
+function frontera_system_update_7113(){
+  $mods = array(
+    'simplenews',
+    'mailsystem',
+    'mimemail',
+    'htmlmail',
+    'frontera_newsletter'
+  );
+
+  module_enable($mods);
+
+  $default_id = mailsystem_default_id();
+  $default_value = mailsystem_default_value();
+
+  $mail_system = variable_get('mail_system', array());
+
+  $mail_system['simplenews'] = 'HTMLMailSystem';
+
+  variable_set('mail_system', $mail_system);
+
+  /* single newsletter configuration is not exportable through use of feature
+   * wrote custom code
+   */
+
+  // name of the taxonomy term of the default newsletter
+  $term_name = "Frontera Project newsletter";
+
+  $term = taxonomy_get_term_by_name($term_name);
+  $k = key($term);
+
+  if (!empty($k)){
+    $results = db_select('simplenews_category', 'sc')
+      ->fields('sc', array('tid', 'format', 'priority', 'receipt', 'from_name', 'email_subject', 'from_address', 'hyperlinks', 'new_account', 'opt_inout', 'block'))
+      ->condition('tid', $term[$k]->tid, '=')
+      ->execute()
+      ->fetchAssoc();
+
+    $obj = (object) $results;
+
+    // set format to send email
+    $obj->format = 'html';
+
+
+    db_merge('simplenews_category')
+      ->key(array('tid' => $obj->tid))
+      ->fields(array(
+        'tid' => $obj->tid,
+        'format' => $obj->format,
+        'priority' => $obj->priority,
+        'receipt' => $obj->receipt,
+        'from_name' => $obj->from_name,
+        'from_address' => $obj->from_address,
+        'email_subject' => $obj->email_subject,
+        'hyperlinks' => $obj->hyperlinks,
+        'new_account' => $obj->new_account,
+        'opt_inout' => $obj->opt_inout,
+        'block' => $obj->block,
+      ))
+      ->execute();
+  }
+ }
+
+/**
+ * Enables the migration module.
+ */
+function frontera_system_update_7114() {
+  module_enable(array('frontera_migration'));
+}
+
+/**
+ * Enables the rewrite of terms with the panel's variants.
+ */
+function frontera_system_update_7115() {
+  variable_set('page_manager_term_view_disabled', FALSE);
+  $GLOBALS['page_manager_enabling_term_view'] = TRUE;
+}
+
+/**
+ * Enable Frontera theme and dependencies.
+ */
+function frontera_system_update_7116() {
+
+  // Install theme dependencies.
+  module_enable(array('fences', 'semantic_panels'));
+  variable_set('fences_default_markup', 1);
+  variable_set('fences_default_classes', 1);
+
+  // Replace bartik theme with Frontera theme.
+  theme_enable(array('frontera_omega'));
+  variable_set('theme_default', 'frontera_omega');
+  theme_disable(array('bartik'));
+}
+
+/**
+ * Prevent spam account registrations.
+ */
+function frontera_system_update_7117() {
+  variable_set('user_register', USER_REGISTER_ADMINISTRATORS_ONLY);
+}
+
+/**
+ * Enable Footer feature and import default footer content.
+ */
+function frontera_system_update_7118() {
+  // The default content is imported automatically using features hooks,
+  // see frontera_footer.module.
+  features_install_modules(array('frontera_footer'));
+}
+
+/**
+ * Enable Panels Everywhere site template from theme.
+ */
+function frontera_system_update_7119() {
+  variable_set('panels_everywhere_site_template_enabled', TRUE);
+}
+
+/**
+ * Doh! Also, enable Panels Everywhere module #facepalm.
+ */
+function frontera_system_update_7120() {
+  module_enable(array('panels_everywhere'));
+}
+
+/**
+ * Enable print module
+ */
+function frontera_system_update_7121() {
+  module_enable(array('print'));
+}
+
+/**
+ * Enable search_api_autocomplete module
+ */
+function frontera_system_update_7122() {
+  module_enable(array('search_api_autocomplete'));
+}
+
+/**
+ * Enable ct_carousel_slide feature
+ */
+function frontera_system_update_7123() {
+  module_enable(array('ct_carousel_slide'));
+}
+
+/**
+ * Enable sharethis module
+ */
+function frontera_system_update_7124() {
+  module_enable(array('sharethis'));
+}
+
+/**
+ * Enable ct_blog feature
+ */
+function frontera_system_update_7125() {
+  module_enable(array('ct_blog'));
+}
+
+/**
+ * Enable internal_nodes module
+ */
+function frontera_system_update_7126() {
+  module_enable(array('internal_nodes'));
+}
+
+/**
+ * Enable ct_carousel_slide feature
+ */
+function frontera_system_update_7127() {
+  module_enable(array('ct_carousel_slide'));
+}
+
+/**
+ * Enable frontera_sharethis feature
+ */
+function frontera_system_update_7128() {
+  module_enable(array('frontera_sharethis'));
+}
+
+/**
+ * Enable search_api_solr_overrides
+ */
+function frontera_system_update_7129() {
+  module_enable(array('search_api_solr_overrides'));
+}
+
+/**
+ * Re-Enable print module
+ * Note: for some reasons is not enabled anymore.
+ * It has been enabled with frontera_system_update_7121
+ */
+function frontera_system_update_7130() {
+  module_enable(array('print'));
+}
+
+/**
+ * Enable the basic page feature.
+ */
+function frontera_system_update_7131() {
+  module_enable(array('ct_basic_page'));
+}
+
+/**
+ * Enable the defaultcontent module.
+ */
+function frontera_system_update_7132() {
+  module_enable(array('defaultcontent'));
+}
+
+/**
+ * Disable the defaultcontent module.
+ */
+function frontera_system_update_7133() {
+  module_disable(array('defaultcontent'));
+}
+
+/**
+ * Enable the content feature.
+ */
+function frontera_system_update_7134() {
+  module_disable(array('frontera_default_content'));
+}
+
+/**
+ * Remove print module, in favor of print stylesheet in theme.
+ */
+function frontera_system_update_7135() {
+  module_disable(array('print'));
+  if (drupal_uninstall_modules(array('print'))) {
+    drupal_set_message('Print module successfully uninstalled.');
+  }
+  else {
+    drupal_set_message('!! Print module could not be uninstalled.', 'error');
+  }
+}
+
+/**
+ * Track user permissions in code via features.
+ */
+function frontera_system_update_7136() {
+  module_enable(array('frontera_users'));
+}
+
+/**
+ * Enable panelizer module.
+ */
+function frontera_system_update_7137() {
+  module_enable(array('panelizer'));
+}
+
+/**
+ * Enable search_api_multi module.
+ */
+function frontera_system_update_7138() {
+  module_enable(array('search_api_multi'));
+}
+
+/**
+ * Enable search_api_multi_facetapi module.
+ */
+function frontera_system_update_7139() {
+  module_enable(array('search_api_multi_facetapi'));
+}
+
+/**
+ * Enable ckeditor modules.
+ */
+function frontera_system_update_7140() {
+  module_enable(array('ckeditor'));
+}
+
+/**
+ * Enable insert modules.
+ */
+function frontera_system_update_7141() {
+  module_enable(array('insert'));
+}
+
+/**
+ * Enable video_filter modules.
+ */
+function frontera_system_update_7142() {
+  module_enable(array('video_filter'));
+}
+
+/**
+ * Enable pathauto module.
+ */
+function frontera_system_update_7143() {
+  module_enable(array('pathauto'));
+}
+
+/**
+ * Enable the new label ct feature.
+ */
+function frontera_system_update_7144() {
+  module_enable(array('ct_label_nodes'));
+}
+
+/**
+ * Enable the new frontera tipsy module.
+ */
+function frontera_system_update_7145() {
+  module_enable(array('frontera_tipsy'));
+}
+
+/**
+ * Enable the new frontera solr server feature.
+ */
+function frontera_system_update_7146() {
+  module_enable(array('frontera_solr_server'));
+}

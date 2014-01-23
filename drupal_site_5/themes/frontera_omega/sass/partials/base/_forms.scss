@@ -1,0 +1,27 @@
+
+/* common search field styles */
+%input-search-field {
+  background: #fff url(../images/search-icon.png) 4px 50% no-repeat;
+  border: 1px solid #d4d4d4;
+  height: 26px;
+  width: 100%;
+  padding-left: 22px;
+  @media print {
+    padding-left: 4px;
+  }
+}
+
+/* Submit/Apply Buttons */
+.form-text {
+  border: 1px solid $border-color;
+  height: 23px;
+}
+
+.form-submit {
+  background: #015f8d;
+  border: none;
+  color: #fff;
+  font: 0.923em Georgia, Times, "Times New Roman", serif;
+  padding: 5px 12px;
+  text-decoration: none;
+}

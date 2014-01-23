@@ -1,0 +1,15 @@
+<?php
+/**
+ * @file
+ * Code for the Frontera Default Content feature.
+ */
+
+include_once 'frontera_default_content.features.inc';
+
+/**
+ * Implements hook_query_TAG_alter().
+ */
+function frontera_default_content_query_node_export_features_alter(SelectQuery $query) {
+  // Exclude from default content types that will never be used as default.
+  $query->condition('n.type', array('container', 'label', 'name', 'recording'), 'NOT IN');
+}

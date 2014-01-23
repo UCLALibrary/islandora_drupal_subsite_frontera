@@ -1,0 +1,27 @@
+/**
+ * Fixes a situation where some panels flexible layouts that only have one
+ * region named "new-center" are getting squished.
+ */
+.panels-flexible-region-first.panels-flexible-region-last {
+  width: 100%;
+}
+
+/**
+ * Override default 2col-stacked layout.
+ */
+.panel-2col-stacked {
+  .panel-col-first {
+    width: 65.5%;
+    > .inside {
+      padding-right: 18px;
+      margin: 0;
+    }
+  }
+  .panel-col-last {
+    width: 34%;
+    > .inside {
+      padding: 0;
+      margin: 0;
+    }
+  }
+}

@@ -1,0 +1,12 @@
+/**
+ * Drupal system messages.
+ */
+.messages {
+  opacity: .95;
+  margin: 1% 0;
+  box-shadow: 0 1px 2px #666;
+}
+
+.pane-page-messages {
+  overflow: auto;
+}

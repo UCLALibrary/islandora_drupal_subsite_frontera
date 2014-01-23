@@ -1,0 +1,48 @@
+<?php
+/**
+ * @file
+ * Code for the Content Type Label feature.
+ */
+
+include_once 'ct_label.features.inc';
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function ct_label_ctools_plugin_directory($owner, $plugin_type) {
+  if ($owner == 'ctools' && $plugin_type == 'content_types') {
+    return 'plugins/content_types';
+  }
+}
+
+/**
+* Implements hook_views_pre_view().
+*/
+function ct_label_views_pre_view(&$view, $display_id, $args) {
+  if ($view->name == 'label_artists_taxonomy') {
+    if (arg(0) == 'taxonomy' && arg(1) == 'term') {
+      // load the viewed term
+      if ($term = taxonomy_term_load(arg(2))) {
+        // Change the term id that should be filtered for the current display
+        $view_filters = $view->display_handler->get_option('filters');
+        $view_filters['field_record_label_t_tid']['value'][0] = $term->tid;
+        $view_filters['field_record_label_t_tid_1']['value'][0] = $term->tid;
+        $view->display_handler->set_option('filters', $view_filters);
+        $view_footer = $view->display_handler->get_option('footer');
+        $view_footer['frontera_string_link']['url'] = str_replace('[tid]', $term->tid, $view_footer['frontera_string_link']['url']);
+        $view->display_handler->set_option('footer', $view_footer);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_views_query_alter().
+ */
+function ct_label_views_query_alter(&$view, &$query) {
+  if ($view->name == 'label_artists_taxonomy') {
+    // we need to LEFT join the recordings referenced by artist and composer by
+    // default views set to INNER join
+    $query->table_queue['field_composer_node__field_data_field_record_label_t']['join']->type = 'LEFT';
+  }
+}

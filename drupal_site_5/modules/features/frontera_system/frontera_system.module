@@ -1,0 +1,140 @@
+<?php
+/**
+ * @file
+ * Code for the Frontera System feature.
+ */
+
+include_once 'frontera_system.features.inc';
+
+/**
+ * form alter disabled, instead of chosen we use select2 - look form alter in the bottom of this file
+ */
+// function frontera_system_form_facetapi_multiselect_form_1_alter(&$form, &$form_state){
+
+// 	watchdog('frontera_system', 'form alter about facets form: content type');
+// 	// here attach js to form element
+// 	$path = libraries_get_path('chosen');
+// 	$form['#attached']['js'][] = $path . '/chosen.jquery.min.js';
+// 	$form['#attached']['css'][] = $path . '/chosen.css';
+
+// 	watchdog('frontera_system', 'Ecco il path di chosen: %path', array('%path' => $path));
+
+// 	// $path = libraries_get_path('jquery.multiselect');
+// 	// $form['#attached']['js'][] = $path . '/jquery.multiselect.min.js';
+// 	// $form['#attached']['css'][] = $path . '/jquery.multiselect.css';
+
+// 	// here attach the js file with custom code
+// 	$form['#attached']['js'][] = drupal_get_path('module', 'frontera_system') . '/frontera_system.facetapi.multiselect.js';
+// }
+
+/**
+ * menu voice to create a sample form just to test select2 integration
+ */
+function frontera_system_menu(){
+
+	$items = array();
+
+	$items['select2/sampleform'] = array(
+		'title' => t('select2 Sample Form'),
+		'description' => t('Form to test select2 integration for Multiselect field'),
+		'page callback' => 'drupal_get_form',
+		'page arguments' => array('frontera_system_select2_form'),
+		'access arguments' => array('administer users')
+	);
+
+	return $items;
+}
+
+/**
+ * function that define array used for build form
+ */
+function frontera_system_select2_form($form, $form_state){
+
+	$form['seleziona'] = array(
+		'#title' => t('Select2 Example'),
+		'#type' => 'select',
+		'#options' => array(
+			0 => t('selezione 1'),
+			1 => t('selezione 2'),
+			2 => t('selezione 3')
+		),
+		'#empty_option' => t('Select element'),
+		'#multiple'     => TRUE
+		// this attribute is for enable select2 jquery plugin
+		// '#select2' => array()
+	);
+
+	$form['submit'] = array(
+		'#type' => 'submit',
+		'#value' => t('Lancia')
+	);
+
+	return $form;
+}
+
+/**
+ * form alter to insert into select element, present into the simple form, the attribute select2
+ * needed like placeholder to used select2
+ */
+function frontera_system_form_frontera_system_select2_form_alter(&$form, &$form_state, $form_id){
+	watchdog('frontera_system', 'executing form alter upon simple select');
+
+	if(!isset($form['seleziona']['#select2'])){
+		watchdog('frontera_system', 'add select2 support for select input on sample form');
+		$form['seleziona']['#select2'] = array();
+	}
+}
+
+/**
+ * alter form to "Filter by content type" facet - select2 widget
+ */
+// function frontera_system_form_facetapi_multiselect_form_1_alter(&$form, &$form_state, $form_id){
+// 	watchdog('frontera_system', 'executing form alter facet multiselect');
+
+// 	foreach ($form as $key => &$element) {
+// 		if ((isset($element['#type']) and $element['#type'] == 'select') and (isset($element['#multiple']) and ($element['#multiple'] == TRUE))){
+// 			watchdog('frontera_system', 'form alter facet multiselect - enable select2 widget');
+// 			$element['#select2'] = array();
+// 		}
+// 	}
+// }
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Add select2 widget for all selects belonging to faceted forms
+ */
+function frontera_system_form_alter(&$form, &$form_state, $form_id) {
+	// regexp to intercept all form belong to faceted search
+	$pattern = "/^(facetapi_multiselect_form_)(\d{1,})$/";
+
+	// if preg_match return 1 means that actual form is a faceted form
+	if (preg_match($pattern, $form_id) == 1) {
+    foreach ($form as $key => &$element) {
+      if ((isset($element['#type']) and $element['#type'] == 'select') and (isset($element['#multiple']) and ($element['#multiple'] == TRUE))) {
+        $element['#select2'] = array();
+      }
+    }
+	}
+}
+
+/**
+ * with hook_views_api we add a views template file
+ */
+function frontera_system_views_api(){
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'frontera_system'),
+    'template path' => drupal_get_path('module', 'frontera_system') . '/templates'
+  );
+}
+
+/**
+ *
+ */
+function frontera_system_init(){
+	// watchdog('frontera_system', 'frontera system - init function');
+
+	// add css to style promotional block
+	drupal_add_css(drupal_get_path('module', 'frontera_system') . '/css/promotional_block.css');
+}

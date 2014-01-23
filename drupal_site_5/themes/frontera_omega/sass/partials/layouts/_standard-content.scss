@@ -1,0 +1,23 @@
+/*
+ * Standard content template region layouts.
+ */
+.region-image {
+  width: 39.5%;
+  float: left;
+  padding-right: 39px;
+  padding-bottom: 39px;
+}
+.region-summary {
+  width: 59.5%;
+  float: left;
+  padding-bottom: 39px;
+}
+.region-details {
+  float: left;
+  width: 65.9492%;
+  padding-right: 18px;
+}
+.region-complementary {
+  float: left;
+  width: 33.0508%;
+}

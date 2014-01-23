@@ -1,0 +1,6 @@
+name = Frontera Jump to Recording
+description = The jump to recording block.
+package = Frontera
+core = 7.x
+dependencies[] = block
+dependencies[] = frontera_catalog_search

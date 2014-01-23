@@ -1,0 +1,53 @@
+@import "compass/typography/lists";
+
+.facetapi-facetapi-links,
+.facetapi-facetapi-checkbox-links {
+  @include no-bullets;
+  margin: 0;
+  padding: 0;
+  @media print {
+    label, input, a {
+      display: none;
+    }
+    input[type=checkbox]:checked {
+      display: inline;
+    }
+  }
+}
+
+.facetapi-facet-field-label-glossary-index,
+.facetapi-facet-field-artist-glossary-index,
+.facetapi-facet-field-recording-glossary-index {
+  @include horizontal-list;
+  margin-bottom: 15px;
+  min-height: 1.7em;
+  li {
+    position: relative;
+  }
+  .facetapi-active {
+    display: block;
+    position: absolute;
+    text-indent: -99999em;
+    background: none;
+    width: 100%;
+    border: 1px solid #d9d9d9;
+    top: 0;
+    left: 0;
+  }
+}
+a.facetapi-active {
+  color: inherit;
+  text-decoration: none;
+}
+
+.pane-facetapi-qjx0ozukexul1i4uex6qiywp00o5velw,
+.pane-facetapi-dnku5gtuk0s7hj0fxj4jrr04mb0yh6t6,
+.pane-facetapi-1kgjsmxrenepmunaufum5p6ouvvucebz,
+.pane-facetapi-qujcspfccna6kmaoo60sc0huhsrnrmzi {
+  @extend %bg-box-gradient;
+  margin: 0 0 20px;
+}
+
+.select2-container {
+  width: 100% !important
+}

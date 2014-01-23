@@ -1,0 +1,64 @@
+<?php
+/**
+ * @file
+ * Code for the CT Label Nodes feature.
+ */
+
+include_once 'ct_label_nodes.features.inc';
+
+/**
+ * Implements hook_taxonomy_term_insert().
+ */
+function ct_label_nodes_taxonomy_term_insert($term) {
+  if ($term->vocabulary_machine_name == 'label') {
+    if (!isset($term->field_label_node[LANGUAGE_NONE][0]['target_id']) ||
+      empty($term->field_label_node[LANGUAGE_NONE][0]['target_id'])) {
+
+      $nid = db_query("SELECT dest_entity_id
+        FROM {shadow_entity}
+        WHERE source_entity_id = :id and source_entity_type = 'taxonomy_term'",
+        array(':id' => $term->tid))
+        ->fetchField();
+
+      if ($nid) {
+        $term->field_label_node[LANGUAGE_NONE][0]['target_id'] = $nid;
+        field_attach_update('taxonomy_term', $term);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_taxonomy_term_update().
+ */
+function ct_label_nodes_taxonomy_term_update($term) {
+  ct_label_nodes_taxonomy_term_insert($term);
+}
+
+/**
+ * Implements hook_taxonomy_term_load().
+ */
+function ct_label_nodes_taxonomy_term_load($terms) {
+  foreach ($terms as $term) {
+    if ($term->vocabulary_machine_name == 'label') {
+      if (!isset($term->field_label_node[LANGUAGE_NONE][0]['target_id']) ||
+        empty($term->field_label_node[LANGUAGE_NONE][0]['target_id'])) {
+
+        $configs = shadow_entity_get_config();
+        $config = $configs['label_term_to_node'];
+        shadow_entity_clone_entity($term, $config);
+
+        $nid = db_query("SELECT dest_entity_id
+        FROM {shadow_entity}
+        WHERE source_entity_id = :id and source_entity_type = 'taxonomy_term'",
+          array(':id' => $term->tid))
+          ->fetchField();
+
+        if ($nid) {
+          $term->field_label_node[LANGUAGE_NONE][0]['target_id'] = $nid;
+          field_attach_update('taxonomy_term', $term);
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+<?php
+/**
+ * @file
+ * Code for the Frontera Home Page feature.
+ */
+
+include_once 'frontera_home_page.features.inc';
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function frontera_home_page_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools' && in_array($plugin, array('content_types'))) {
+    return "plugins/$plugin";
+  }
+}
+
+/**
+ * Implements hook_views_pre_render().
+ *
+ * Insert properly made default image link in home page view.
+ */
+function frontera_home_page_views_pre_render(&$view) {
+  if ($view->name == 'home_page_random_stuff') {
+    $view->field['nothing']->options['alter']['text'] = '<img src="' . url(base_path() . drupal_get_path('theme', 'frontera_omega') .'/images/noimage.png', array('absolute' => true)) . '" />';
+  }
+}

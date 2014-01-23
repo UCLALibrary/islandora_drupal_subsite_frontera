@@ -1,0 +1,26 @@
+.view-recording-by-artist .field--artist-real-name {
+	display: inline;
+}
+
+// .pane-more-like-this-name, 
+// .pane-more-like-this-recording,
+// .pane-more-like-this-label {
+// 	.views-row {
+// 		padding-left: 40px;
+//    text-indent: -12px;
+//		.views-field:first-child span:before {
+// 		  content: "\2022";
+// 		  font-size: 1.385em;
+// 		  padding: 0 7px 0 0;
+// 		}
+//  }
+// }
+
+%blue-bullet-large {
+  &:before {
+    color: $link-color;
+    content: '\2022';
+    font-size: 1.35em;
+    margin-right: 3px;
+  }
+}

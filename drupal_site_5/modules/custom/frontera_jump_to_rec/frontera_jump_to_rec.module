@@ -1,0 +1,246 @@
+<?php
+/**
+ * @file
+ * Module file for frontera_jump_to_rec.
+ */
+
+// Jump to Recording AutoComplete Path
+define('JTR_AC_PATH', 'ajax/jtrautocomplete');
+
+/**
+ * Implements hook_menu().
+ */
+function frontera_jump_to_rec_menu() {
+  $items[JTR_AC_PATH] = array(
+    'page callback' => '_frontera_jump_to_rec_autocomplete',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK
+  );
+
+  return $items;
+}
+
+
+/**
+ * Implements hook_block_info().
+ *
+ * Declares what blocks are provided by this module.
+ */
+function frontera_jump_to_rec_block_info() {
+  $blocks['jtr_block'] = array(
+    'info' => t('Frontera Jump to a Recording'),
+  );
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_configure().
+ *
+ * This hook declares configuration options for blocks provided by this module.
+ */
+function frontera_jump_to_rec_block_configure($delta = '') {
+  // The $delta parameter tells us which block is being configured.
+  // In this example, we'll allow the administrator to customize
+  // the text of the 'configurable text string' block defined in this module.
+
+  $form = array();
+  if ($delta == 'jtr_block') {
+    // All we need to provide is the specific configuration options for our
+    // block. Drupal will take care of the standard block configuration options
+    // (block title, page visibility, etc.) and the save button.
+    $form['block_example_string'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Block contents'),
+      '#size' => 60,
+      '#description' => t('This text will appear in the example block.'),
+      '#default_value' => variable_get('block_example_string',  t('Some example content.')),
+    );
+  }
+  return $form;
+}
+
+/**
+ * Implements hook_block_save().
+ *
+ * This hook declares how the configured options for a block
+ * provided by this module are saved.
+ */
+function frontera_jump_to_rec_block_save($delta = '', $edit = array()) {
+  // We need to save settings from the configuration form.
+  // We need to check $delta to make sure we are saving the right block.
+  if ($delta == 'jtr_block') {
+    // Have Drupal save the string to the database.
+    variable_set('block_example_string', $edit['block_example_string']);
+  }
+  return;
+}
+
+/**
+ * Implements hook_block_view().
+ *
+ * This hook generates the contents of the blocks themselves.
+ */
+function frontera_jump_to_rec_block_view($which_block = '') {
+  $block = array();
+
+  switch ($which_block) {
+    case 'jtr_block':
+      $block['subject'] = t('Block title');
+      $block['content'] = drupal_get_form('frontera_jump_to_rec_form');
+      break;
+  }
+  return $block;
+}
+
+/**
+ * Generates the jump to recording form
+ */
+function frontera_jump_to_rec_form($form, &$form_state) {
+  // field Label, as autocomplete
+  $form['jtr_block']['jtr_label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Label'),
+    '#required' => TRUE,
+    '#autocomplete_path' => JTR_AC_PATH
+  );
+
+  // field Matrix number
+  $form['jtr_block']['jtr_matrix_number'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Catalog or Matrix Number'),
+    '#required' => TRUE,
+    '#maxlength' => 20,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit',
+  );
+  return $form;
+}
+
+function _frontera_jump_to_rec_autocomplete($string = "") {
+  $matches = array();
+
+  $voc = _get_vocabulary_by_name('label');
+
+  if (isset($voc)) {
+    $query = db_select('taxonomy_term_data', 't')
+      ->condition('t.vid', $voc->vid, '=')
+      ->condition('t.name', '%' . db_like($string) . '%', 'LIKE')
+      ->fields('t', array('name'))
+      ->range(0, 10);
+
+    $return = $query->execute();
+
+    // add matches to $matches
+    foreach ($return as $row) {
+      // $matches[$row->title] = check_plain($row->title);
+      $matches[$row->name] = check_plain($row->name);
+    }
+  }
+
+  // return for JS
+  drupal_json_output($matches);
+}
+
+function _get_vocabulary_by_name($voc_name) {
+  $names = taxonomy_vocabulary_get_names();
+  return isset($names[$voc_name]) ? $names[$voc_name] : NULL;
+}
+
+/**
+ * Implements hook form_validate().
+ */
+/*
+function frontera_jump_to_rec_form_validate($form, &$form_state) {
+  $matrix_number = $form_state['values']['matrix_number'];
+  if (empty($matrix_number) || $matrix_number != 'D-3770-a') {
+    form_set_error('matrix_number', t('Enter a matrix_number => D-3770-a'));
+  }
+}
+*/
+
+/**
+ * Implements hook form_submit().
+ */
+function frontera_jump_to_rec_form_submit($form, &$form_state) {
+  $cleaned_input_matrix = preg_replace("/[^a-zA-Z0-9]+/", "", $form_state['values']['jtr_matrix_number']);
+
+  // Retrieve the target label
+  $query = db_select('taxonomy_term_data', 't')
+      ->condition('t.name', $form_state['values']['jtr_label'], '=')
+      ->fields('t', array('tid'))
+      ->range(0, 1);
+
+  $target_label = $query->execute()->fetchAssoc();
+
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'node')
+    ->entityCondition('bundle', 'recording')
+    ->propertyCondition('status', 1)
+    ->fieldCondition('field_matrix_number_computed', 'value', $cleaned_input_matrix, '=')
+    ->fieldCondition('field_record_label_t', 'tid', $target_label['tid'], '=');
+
+    kpr($query);
+
+  $result = $query->execute();
+
+  if (isset($result['node'])) {
+    $node_nids = array_keys($result['node']);
+
+    if (count($node_nids) == 1) {
+      drupal_goto(url('node/' . $node_nids[0]));
+    }
+    else {
+      //$view = views_get_view('catalog_search_songs');
+      //drupal_goto(url($view->display['page']->display_options['path'] . '/all'),
+      drupal_goto(url('catalog/songs/' . $cleaned_input_matrix),
+        array(
+          'query' => array(
+            'label'=> $form_state['values']['jtr_label'],
+            //'matrix'=> $cleaned_input_matrix
+          )
+        )
+      );
+    }
+  }
+  else {
+    drupal_set_message(t('We could not find a song matching "@matrix_number" on &lt; @label &gt;. Please try again.',
+      array('@label' => $form_state['values']['jtr_label'], '@matrix_number' => $form_state['values']['jtr_matrix_number'])), 'error');
+  }
+}
+
+/* Computed Field */
+
+/**
+ * Definition in code of computed/displayed field
+ */
+function computed_field_field_matrix_number_computed_compute(&$entity_field, $entity_type, $entity, $field, $instance, $langcode, $items) {
+  $matrix = field_get_items($entity_type, $entity, 'field_matrix_number');
+  if (isset($matrix[0])) {
+    $entity_field[0]['value'] = preg_replace("/[^a-zA-Z0-9]+/", "", $matrix[0]['value']);
+  }
+}
+function computed_field_field_matrix_number_computed_display($field, $entity_field_item, $entity_lang, $langcode) {
+  return $entity_field_item['value'];
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function frontera_jump_to_rec_form_alter(&$form, $form_state, $form_id) {
+  if ($form_id == 'views_exposed_form') {
+    if (isset($form['matrix'])) {
+      // Hide the "matrix" exposed filter
+      $form['matrix'] = array(
+        '#type' => 'hidden',
+        '#title' => '',
+      );
+    }
+
+    // Hide the "matrix" label
+    unset($form['#info']['filter-field_matrix_number_computed_value']);
+  }
+}

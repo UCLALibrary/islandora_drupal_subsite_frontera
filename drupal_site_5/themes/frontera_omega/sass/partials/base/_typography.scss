@@ -1,0 +1,84 @@
+/**
+ * Typographical styles.
+ */
+// See also partials/utility/variables/_typography.scss
+
+
+%serif-font { /* Serif font is for body text throughout the site */
+  font-family: $georgia;
+}
+%sans-serif-font { /* Sans serif font is used in association with artists and data */
+  font-family: $myriad-pro;
+}
+%sans-serif-condensed-font { /* Sans serif condensed font is rarely used */
+  font-family: $myriad-pro-cond;
+}
+
+body {
+  font-size: 81.3%; // AKA (13px / 10pts)
+  line-height: 1.6;
+  @extend %sans-serif-font;
+  color: #060606;
+}
+
+a, a:visited {
+  color: $link-color;
+  text-decoration: underline;
+}
+a:hover, a:focus, a:active {
+  color: #222;
+}
+a.active {
+  text-decoration: none;
+  color: inherit;
+  cursor: default;
+}
+
+%heading-font {
+  @extend %serif-font;
+  font-weight: normal;
+  margin-bottom: 0;
+  line-height: 1.3em;
+}
+
+h1,
+%h1 {
+  @extend %heading-font;
+  font-size: 25px;
+}
+.page-title {
+  margin-top: 0;
+}
+
+h2,
+%h2 {
+  @extend %heading-font;
+  font-size: 20px;
+}
+
+h3
+%h3 {
+  font-size: 16px;
+  text-transform: uppercase;
+  margin-bottom: 0;
+  line-height: 1.3em;
+}
+
+.pane-node-title {
+  @extend %h1;
+}
+
+
+%block-letter-heading {
+  border-top: 1px solid $border-color;
+  border-bottom: 1px solid $border-color;
+  font-size: 1.231em;
+  margin-bottom: 0.83em;
+  padding: 8px 0 6px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+p, pre {
+  margin: .7em 0;
+}

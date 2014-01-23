@@ -1,0 +1,140 @@
+
+/**
+ * A reusable block style with a gradient background.
+ */
+%bg-box-gradient {
+  background: url(../images/box-grad.png) 0 0 repeat-x;
+  border: 1px solid #d4d4d4;
+  padding: 10px 10px 15px 18px;
+  > .pane-title {
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+}
+%bg-box-gradient-2 {
+  background: #f0f0ea url(../images/box-grad-2.png) 0 0 repeat-x;
+  border: 1px solid #d4d4d4;
+  padding: 10px 10px 15px 20px;
+}
+@media print {
+  %bg-box-gradient,
+  %bg-box-gradient-2 {
+    border: none;
+    padding: 0;
+  }
+}
+
+/* Submit/Apply Buttons */
+.promotional-center-learn-more a {
+  @extend .form-submit;
+}
+
+.pane-searchapi-keyword-form-pane {
+  margin-bottom: 15px;
+  .form-item-keywords {
+    label {
+      margin-bottom: 10px;
+    }
+  }
+}
+
+/* Tags, Connect, Categories, Promotional block */
+.pane-blog-index-panel-pane-1,
+.pane-simplenews-1,
+.pane-blog-category-list,
+.pane-promotional-block {
+  @extend %bg-box-gradient;
+  margin: 20px 0;
+  .promotional-title,
+  .promotional-center-left,
+  .promotional-center-right {
+    padding: 0;
+  }
+  .promotional-center-right {
+    width: 65%;
+    padding-left: 15px;
+  }
+  h1 {
+    margin-top: 8px;
+    font: bold 1.385em/1.538em Georgia, Times, "Times New Roman", serif;
+  }
+  h2 {
+    font-size: 1.308em;
+    margin: 0;
+    text-transform: uppercase;
+  }
+  p {
+    margin: 0;
+  }
+  .promotional-center-right p {
+    font: 0.923em Georgia, Times, "Times New Roman", serif;
+    margin: 0 0 1.2em;
+    a:link {
+      font-weight: bold;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  }
+  .form-item-mail {
+    float: left;
+    margin-right: 3px;
+    .form-text {
+      padding: 3px 0 2px;
+      width: 160px;
+    }
+  }
+  .form-submit {
+    margin-top: 20px;
+  }
+  .issues-link {
+    clear: both;
+  }
+}
+.pane-blog-category-list {
+  font-weight: bold;
+}
+
+/* Artist page filter boxes */
+.views-exposed-form-search-solr-search-solr-pane,
+.views-exposed-form-catalog-labels-solr-catalog-labels-solr-pane,
+.views-exposed-form-catalog-artists-solr-catalog-artists-solr-pane,
+.views-exposed-form-catalog-songs-solr-catalog-songs-solr-pane {
+  @extend %bg-box-gradient;
+  margin: 0 0 10px;
+  .views-widget-filter-field_artist_artist_name,
+  .views-widget-filter-field_artist_song_titles {
+    float: none;
+  }
+  input.form-text {
+    @extend %input-search-field;
+  }
+  label {
+    font-weight: normal;
+  }
+  .form-submit {
+    margin-top: 9px !important;
+  }
+}
+.pane-frontera-jump-to-rec-jtr-block {
+  @extend %bg-box-gradient-2;
+  margin: 0 0 10px;
+  h2 {
+    font-size: 1.308em;
+    margin: 0;
+    text-transform: uppercase;
+  }
+  label {
+    font-weight: normal;
+  }
+  input.form-text {
+    @extend %input-search-field;
+  }
+  .form-item-jtr-matrix-number {
+    float: left;
+  }
+  .form-submit {
+    margin: 9px 0 0 !important;
+  }
+}

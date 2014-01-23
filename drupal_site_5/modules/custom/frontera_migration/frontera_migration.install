@@ -1,0 +1,247 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function frontera_migration_schema() {
+  $schema = array();
+
+  $schema['frontera_migration_prepared'] = array(
+    'description' => 'TODO: please describe this table!',
+    'fields' => array(
+      'id' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'Accompaniment' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'text',
+        'not null' => FALSE,
+      ),
+      'ArtistonLabel' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'ArtistsRealNames' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'text',
+        'not null' => FALSE,
+      ),
+      'ArtistsStandardName' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'Catalognumberalpha' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'CatNumberSort' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'Composer' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'Condition_val' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'CountryofLabel' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'Holding' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'KeyWord' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'labelphonenumber' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'LabelSongType' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'LabelTitle' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'MatrixNumber' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'Notes' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'text',
+        'not null' => FALSE,
+      ),
+      'Producer' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'Publisher' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'RecordLabel' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'RecordingDate' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'RecordingFormat' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'RecordingLocation' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'Side' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'Styli' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'Time' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'TitleofAlbum' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'TrackNumber' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'TransferFileName' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'TransferEquipt' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'text',
+        'not null' => FALSE,
+      ),
+      'Yearofcopyright' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'AlbumArtist' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  $schema['frontera_label_histories'] = array(
+    'description' => 'TODO: please describe this table!',
+    'fields' => array(
+      'label' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'history' => array(
+        'description' => 'TODO: please describe this field!',
+        'type' => 'text',
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('label'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Enable migrate extras.
+ */
+function frontera_migration_update_7000(&$sandbox) {
+  module_enable(array('migrate_extras'));
+}
+
+/**
+ * Enable date migrate.
+ */
+function frontera_migration_update_7001(&$sandbox) {
+  module_enable(array('date_migrate'));
+}
+
+/**
+ * Create a table needed by the label histories migration.
+ */
+function frontera_migration_update_7002(&$sandbox) {
+  $schema = drupal_get_schema('frontera_label_histories', TRUE);
+
+  db_create_table('frontera_label_histories', $schema);
+}

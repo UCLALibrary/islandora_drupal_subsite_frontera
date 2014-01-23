@@ -1,0 +1,19 @@
+.node-type-name {
+  .page-title {
+    display: none;
+  }
+  .region-complementary {
+    @extend %bg-box-gradient;
+    .panel-pane:first-child {
+      .pane-title {
+        margin-top: 0;
+      }
+    }
+  }
+  .pane-name-recorded-composed-panel-pane-1 .pane-title {
+    display: none;
+    @media print {
+      display: block;
+    }
+  }
+}

@@ -1,0 +1,16 @@
+// Load utility, base and components.
+@import "partials/utility/**/*";
+@import "partials/base/**/*";
+@import "partials/layouts/**/*";
+@import "partials/regions/**/*";
+@import "partials/components/**/*";
+
+/**
+ * Print stylesheet for the Frontera Project.
+ * @author James Wilson <jrwilson3@gmail.com>
+ * Print styles are inlined to avoid more http requests: h5bp.com/r
+ */
+@media print {
+  @import "partials/print/**/*";
+}
+/* End print styles */

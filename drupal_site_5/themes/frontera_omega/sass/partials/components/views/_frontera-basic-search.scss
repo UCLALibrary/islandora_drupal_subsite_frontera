@@ -1,0 +1,23 @@
+/**
+ * Search page
+ */
+.page-frontera-search {
+  .view-search-solr {
+    .views-row {
+      margin-bottom: 20px;
+    }
+    .views-field-frontera-taxonomy-index-name,
+    .views-field-frontera-basic-index-title {
+      @extend %serif-font;
+      float: left;
+      font-size: 1.154em;
+      margin-right: 6px;
+    }
+    .views-field-frontera-basic-index-field-entity-bundle {
+      font-size: 1.154em;
+    }
+    .views-field-frontera-basic-index-field-entity-bundle:before {
+      content: "\002D";
+    }
+  }
+}

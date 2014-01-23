@@ -1,0 +1,52 @@
+/**
+ * Blog related styles
+ */
+.page-blog .page-title,
+.section-blog-category .page-title,
+.section-blog-category .pane-term-description {
+  margin-bottom: 25px;
+}
+
+.view-blog-index,
+.view-blog-index-tag {
+  max-width: 500px;
+  .views-field-title {
+    @extend %h1;
+    font-size: 18px;
+  }
+  .views-row {
+    border-bottom: 1px solid #d4d4d4;
+    margin-bottom: 20px;
+    padding: 0 0 15px 0;
+    .field--thumbnail {
+      float: left;
+      margin: 18px 20px 1px 0;
+    }
+  }
+  .views-row-last {
+    border-bottom: none;
+  }
+}
+
+.node-type-blog {
+  .panels-flexible-region-first .panels-flexible-region-inside-first {
+    max-width: 550px;
+  }
+  .pane-node-body {
+    border-bottom: 1px solid #d4d4d4;
+    margin-bottom: 20px;
+    padding: 0 0 15px 0;
+    .field--body img {
+      float: left;
+      margin: 4px 10px 7px 0;
+    }
+  }
+}
+.node--blog--teaser {
+  margin-bottom: 20px;
+  padding: 0 0 23px 0;
+  border-bottom: 1px solid #d4d4d4;
+  &:last-child {
+    border-bottom: none;
+  }
+}

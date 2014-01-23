@@ -1,0 +1,30 @@
+@import "compass/typography/lists/horizontal-list";
+
+$primary-links-padding: 20px;
+.primary-links {
+  @include clearfix;
+  @include horizontal-list-container();
+  @extend %sans-serif-condensed-font;
+  font-size: 23px;
+  line-height: 30px;
+  margin-left: -$primary-links-padding;
+  > li {
+    @include horizontal-list-item();
+    padding: 0;
+    white-space: nowrap;
+  }
+  a {
+    color: #cdcdc5;
+    text-decoration: none;
+    padding: 9px $primary-links-padding 8px;
+    &.active {
+      color: #fff;
+    }
+    &:hover,
+    &:active,
+    &:focus {
+      outline: none;
+      text-decoration: underline;
+    }
+  }
+}

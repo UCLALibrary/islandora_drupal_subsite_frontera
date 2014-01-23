@@ -1,0 +1,268 @@
+/**
+ * Basic print resets.
+ */
+* {
+  color: #000 !important; /* Black prints faster: h5bp.com/s */
+  background: transparent !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/**
+ * Underline links, so its obvious they are links.
+ */
+a,
+a:visited {
+  text-decoration: underline;
+}
+
+/**
+ * Append the url to some links.
+ */
+p a[href],
+%append-url {
+  &:after {
+    content: " ("attr(href)")";
+  }
+}
+p a[href^="/"] {
+  &:after {
+    content: " (http://example.com"attr(href)")";
+  }
+}
+
+/**
+ * Make some title links wrap the URL below.
+ */
+.view-frontera-catalog-search-artists .views-field-title a,
+.view-frontera-catalog-search-labels .views-field-title a,
+.view-frontera-catalog-search-song .views-field-title a {
+  text-decoration: none;
+  &:after {
+    display: block;
+    color: #999 !important;
+    text-decoration: none;
+  }
+}
+
+/**
+ * Append full title to abbreviations.
+ */
+abbr[title]:after {
+  content: " (" attr(title) ")";
+}
+
+/*
+* Don't show links for images, or javascript/internal links
+*/
+.ir a,
+#logo,
+th a,
+.tabs a,
+.drupal-navbar a,
+a[href^="javascript:"],
+a[href^="#"] {
+  &:after {
+    content: "" !important;
+  }
+}
+
+pre,
+blockquote {
+  border: 1px solid #999;
+  page-break-inside: avoid;
+}
+
+thead {
+  display: table-header-group; /* h5bp.com/t */
+}
+
+th {
+  border-bottom: 2px solid #bbb;
+  background: #e4e4e4 !important;
+}
+td {
+  border-bottom: 1px solid #d4d4d4;
+}
+table {
+  width: 100%;
+}
+
+tr,
+img {
+  page-break-inside: avoid;
+}
+
+img {
+  max-width: 100% !important;
+}
+
+@page {
+  margin: .8cm;
+}
+
+p,
+h2,
+h3 {
+  orphans: 3;
+  widows: 3;
+}
+
+h2,
+h3 {
+  page-break-after: avoid;
+}
+
+
+/**
+ * Hide the following elements from print.
+ */
+.tabs,
+.l-user,
+.l-help,
+.alpha-pager,
+.ui-tabs-nav,
+.l-navigation,
+.form-actions,
+.drupal-navbar,
+.node-readmore,
+.pane-simplenews-1,
+.views-submit-button,
+.simplenews-subscribe,
+.footer-column--first,
+.pane-node-comment-form,
+.pane-blog-index-panel-pane-1,
+.pane-sharethis-sharethis-block,
+.pane-jwplayer-render-link-full,
+.pane-jwplayer-render-link-sample,
+.pane-frontera-jump-to-rec-jtr-block,
+.pane-recording-top-page-panel-pane-1,
+.pane-recording-top-page-panel-pane-2,
+.pane-recording-top-page-panel-pane-3,
+.facetapi-facet-field-label-glossary-index,
+.facetapi-facet-field-artist-glossary-index,
+.facetapi-facet-field-recording-glossary-index,
+.views-exposed-form-frontera-basic-search-page {
+  display: none !important;
+}
+
+/**
+ * Remove border, padding from the following elements.
+ */
+.l-help,
+.l-header,
+.l-content,
+.l-branding,
+.pane-page-tabs,
+.ui-widget-header,
+.ui-widget-content,
+.ui-tabs .ui-tabs-panel,
+.pane-frontera-home-page-social-pane {
+  border: none !important;
+  padding: 0 !important;
+}
+
+/**
+ * Adjust jquery ui tabs to always display all tabs.
+ */
+.ui-tabs .ui-tabs-hide {
+  display: block !important;
+}
+
+/**
+ * Adjust header for print.
+ */
+.l-header {
+  height: auto;
+  border-bottom: 1px solid #D4D4D4;
+}
+.l-header .pane-page-logo {
+  padding: 0 0 20px;
+  width: 66%;
+}
+
+/**
+ * Adjust content for print.
+ */
+.l-help,
+.l-content {
+  padding: 20px 0;
+}
+
+/**
+ * Adjust pagers for print.
+ */
+.pager {
+  margin: 0;
+  padding: 10px;
+  text-align: right;
+}
+.pager__item {
+  display: none;
+}
+.pager__item--current {
+  display: inline;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-weight: normal;
+  color: #AAA !important;
+  &:before {
+    content: "* Showing results from page ";
+  }
+  &:after {
+    content: " of multiple pages";
+  }
+}
+
+/**
+ * Adjust panels layout for print.
+ */
+.panels-flexible-region {
+  width: 100%;
+  float: none;
+}
+.region-summary,
+.panels-flexible-region-inside {
+  padding: 0 !important;
+}
+.region-image,
+.region-complementary {
+  display: none;
+}
+.region-results,
+.region-filters,
+.region-details,
+.region-summary {
+  width: 100%;
+  float: none;
+}
+
+
+/**
+ * Don't display images.
+ */
+.pane-node-field-images,
+.views-field-field-images {
+  display: none;
+}
+
+/**
+ * Adjust font size on catalog search results.
+ */
+.page-catalog {
+  font-size: 60%;
+  .views-table a {
+    text-decoration: none;
+  }
+}
+
+/*
+ * Add horizontal rules for notes and lyrics.
+ */
+.pane-panels-mini.pane-recording-tab-notes,
+.pane-panels-mini.pane-recording-tab-lyrics {
+  margin-top: 15px !important;
+  padding-top: 15px !important;
+  border-top: 1px solid $border-color;
+}

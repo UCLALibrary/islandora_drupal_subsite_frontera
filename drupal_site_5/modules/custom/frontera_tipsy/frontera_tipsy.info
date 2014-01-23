@@ -1,0 +1,3 @@
+name = Frontera Tipsy
+description = Implement some popup functionality using the tipsu lib
+core = 7.x

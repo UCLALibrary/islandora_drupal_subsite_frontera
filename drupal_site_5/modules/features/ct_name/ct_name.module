@@ -1,0 +1,16 @@
+<?php
+/**
+ * @file
+ * Code for the Content Type Name feature.
+ */
+
+include_once 'ct_name.features.inc';
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function ct_name_ctools_plugin_directory($owner, $plugin_type) {
+  if ($owner == 'ctools' && $plugin_type == 'content_types') {
+    return 'plugins/content_types';
+  }
+}

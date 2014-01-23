@@ -1,0 +1,118 @@
+<?php
+/**
+ * @file
+ * Code for the frontera_footer feature.
+ */
+
+include_once 'frontera_footer.features.inc';
+
+/**
+ * Implements hook_post_features_enable_feature().
+ */
+function frontera_footer_post_features_enable_feature($component) {
+
+  // Certain features components must be enabled before importing the blocks.
+  static $enabled_components;
+  $enabled_components[] = $component;
+  $required_components = array('bean_type', 'field_base', 'field_instance', 'variable');
+  foreach ($required_components as $required_component) {
+    if (!in_array($required_component, $enabled_components)) {
+      return;
+    }
+  }
+
+  // Create the three default footer blocks after the feature is installed.
+  $footer_first = array(
+    'delta' => 'footer-first',
+    'label' => t('Footer First'),
+    'title' => '',
+    'type' => 'footer',
+    'view_mode' => 'default',
+    'data' => array(),
+    'field_footer_text' => array(
+      'en' => array(
+        '0' => array(
+          'value' => '
+            <div class="col1">
+            A joint project of<br />
+            the UCLA Chicano Studies Research Center,<br />
+            the Arhoolie Foundation,<br />
+            and the UCLA Digital Library
+            </div>
+            <div class="col2">
+              <a href="http://www.chicano.ucla.edu" id="footer-link-1">C/S</a><a href="http://www.arhoolie.org" id="footer-link-2">AF</a><a href="http://library.ucla.edu" id="footer-link-3">UCLA Library</a>
+            </div>
+            <div class="col3">
+            Made possible by the UCLA Los Tigres de Norte Fund, the National Endowment for the Humanities, the National Endowment for the Arts, the GRAMMY Foundation, the Fund for Folk Culture, Arhoolie Records, Mr. and Mrs. E. W. Littlefield Jr., and others.
+            </div>',
+          'format' => 'full_html',
+        ),
+      ),
+    ),
+  );
+
+  $footer_second = array(
+    'delta' => 'footer-second',
+    'label' => t('Footer Second'),
+    'title' => '',
+    'type' => 'footer',
+    'view_mode' => 'default',
+    'data' => array(),
+    'field_footer_text' => array(
+      'en' => array(
+        '0' => array(
+          'value' => '',
+          'format' => 'full_html',
+        ),
+      ),
+    ),
+  );
+
+  $footer_last = array(
+    'delta' => 'footer-third',
+    'label' => t('Footer Third'),
+    'title' => '',
+    'type' => 'footer',
+    'view_mode' => 'default',
+    'data' => array(),
+    'field_footer_text' => array(
+      'en' => array(
+        '0' => array(
+          'value' => '<p>© 2013 UC Regents</p>',
+          'format' => 'full_html',
+        ),
+      ),
+    ),
+  );
+
+  // Save the beans, if they aren't already saved.
+  if (!bean_load_delta($footer_first['delta'])) {
+    $bean = bean_create($footer_first);
+    if (!bean_save($bean)) {
+      drupal_set_message('Footer first block could not be saved.');
+    }
+    else {
+      drupal_set_message('Footer first block was imported.');
+    }
+  }
+
+  if (!bean_load_delta($footer_second['delta'])) {
+    $bean = bean_create($footer_second);
+    if (!bean_save($bean)) {
+      drupal_set_message('Footer second block could not be saved.');
+    }
+    else {
+      drupal_set_message('Footer second block was imported.');
+    }
+  }
+
+  if (!bean_load_delta($footer_last['delta'])) {
+    $bean = bean_create($footer_last);
+    if (!bean_save($bean)) {
+      drupal_set_message('Footer third block could not be saved.');
+    }
+    else {
+      drupal_set_message('Footer third block was imported.');
+    }
+  }
+}

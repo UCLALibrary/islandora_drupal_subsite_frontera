@@ -1,0 +1,39 @@
+.promotional-title {
+	width: 94%;
+	padding: 0% 3% 0% 3%;
+}
+
+.promotional-center {
+	width: 100%;
+}
+
+.promotional-center-left {
+	width: 34%;
+	padding: 3% 3% 3% 3%;
+	float: left;
+}
+
+.promotional-center-right {
+	width: 54%;
+	padding: 3% 3% 3% 3%;
+	float: left;
+}
+
+div.promotional-center-learn-more {
+	/* width:50%; */
+	float: left;
+	height:10%;
+	text-align:center;
+	background:blue;
+	/* padding: 3% 3% 3% 3%; */
+}
+
+div.promotional-center-learn-more a {
+	color:white ! important;
+}
+
+#block-views-promotional-block-block-1 {
+  float: left;
+}
+
+/* style="width:50%;height:10%;text-align:center;background:blue;" */

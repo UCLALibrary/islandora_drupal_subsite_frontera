@@ -1,0 +1,17 @@
+name = Content Type Container
+description = Enable the Container Content Type
+core = 7.x
+package = Frontera
+php = 5.2.4
+version = 7.x-1.2
+project = ct_container
+dependencies[] = entityreference
+dependencies[] = features
+dependencies[] = strongarm
+features[ctools][] = strongarm:strongarm:1
+features[features_api][] = api:2
+features[node][] = container
+features[variable][] = field_bundle_settings_node__container
+features_exclude[field_base][field_container_recording] = field_container_recording
+features_exclude[field_instance][node-container-field_container_recording] = node-container-field_container_recording
+project path = sites/all/modules/features

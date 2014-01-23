@@ -1,0 +1,18 @@
+name = Frontera Migration
+description = Implementation of data migration for the Frontera project
+package = FRONTERA
+core = 7.x
+version = 7.x-1.x
+
+dependencies[] = migrate
+dependencies[] = migrate_ui
+dependencies[] = migrate_extras
+dependencies[] = date_migrate
+
+files[] = includes/frontera_prepare.inc
+files[] = includes/frontera_recordings.inc
+
+files[] = includes/frontera_names.inc
+files[] = includes/frontera_labels.inc
+files[] = includes/frontera_albums.inc
+files[] = includes/frontera_histories.inc
