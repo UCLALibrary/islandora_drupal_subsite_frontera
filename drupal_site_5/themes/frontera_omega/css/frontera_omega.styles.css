@@ -1588,7 +1588,6 @@ ul.secondary a.active {
   #logo:after,
   th a:after,
   .tabs a:after,
-  .drupal-navbar a:after,
   a[href^="javascript:"]:after,
   a[href^="#"]:after {
     content: "" !important; }
@@ -1652,7 +1651,6 @@ ul.secondary a.active {
   .ui-tabs-nav,
   .l-navigation,
   .form-actions,
-  .drupal-navbar,
   .node-readmore,
   .pane-simplenews-1,
   .views-submit-button,

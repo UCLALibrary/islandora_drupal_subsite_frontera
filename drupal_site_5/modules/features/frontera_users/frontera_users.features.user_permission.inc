@@ -107,13 +107,6 @@ function frontera_users_user_default_permissions() {
     'module' => 'internal_nodes',
   );
 
-  // Exported permission: access navbar.
-  $permissions['access navbar'] = array(
-    'name' => 'access navbar',
-    'roles' => array(),
-    'module' => 'navbar',
-  );
-
   // Exported permission: access promotional node view.
   $permissions['access promotional node view'] = array(
     'name' => 'access promotional node view',
